@@ -26,62 +26,78 @@
     <div class="page-shell">
       <header class="page-header">
         <p class="eyebrow">Working Group Prototype</p>
-        <div class="page-heading">
-          <div>
+        <div class="masthead">
+          <div class="masthead-copy">
             <h1>Morris Township Planning Map</h1>
             <p class="lede">
-              A lightweight discussion tool for reviewing known walking and
-              biking concerns, understanding destinations, and preparing for a
-              more public-facing engagement phase later.
+              A working map for reviewing walkability and bikeability concerns
+              in Morris Township, with current hotspot records organized for
+              discussion of sidewalk gaps, crossings, and local destinations.
+            </p>
+            <p class="masthead-note">
+              This prototype presents TAC source material as a clearer civic
+              reference: one map for orientation, one working rail for filtering
+              records, and one place to review what each location represents.
             </p>
           </div>
-          <div class="header-note">
-            <p>Version 1 combines TAC hotspot data with simple destination placeholders.</p>
-            <p>Designed for sharing, discussion, and easy iteration on GitHub Pages.</p>
-          </div>
+          <section class="brief-card" aria-label="Project brief">
+            <h2>Project Brief</h2>
+            <dl class="brief-list">
+              <div class="brief-row">
+                <dt>Status</dt>
+                <dd>Working-group prototype for review and discussion.</dd>
+              </div>
+              <div class="brief-row">
+                <dt>Source Data</dt>
+                <dd>TAC hotspot points with contextual township overlays; destination markers remain placeholders pending review.</dd>
+              </div>
+              <div class="brief-row">
+                <dt>Audience</dt>
+                <dd>Morris Township staff, TAC members, and close planning collaborators.</dd>
+              </div>
+            </dl>
+          </section>
         </div>
       </header>
 
       <main class="app-shell">
+        <section class="map-column">
+          <div class="map-card">
+            <div class="map-card-header">
+              <div>
+                <p class="eyebrow">Map</p>
+                <h2>Walkability and Bikeability Review</h2>
+              </div>
+            </div>
+            <div id="map" aria-label="Interactive Morris Township planning map"></div>
+          </div>
+        </section>
+
         <aside class="sidebar">
-          <section class="panel panel-intro">
+          <section class="panel panel-tools">
             <div class="panel-header">
-              <h2>About This Prototype</h2>
+              <div>
+                <h2>Map Tools</h2>
+                <p class="panel-subtitle">
+                  Filter hotspot categories and adjust supporting context
+                  layers.
+                </p>
+              </div>
             </div>
-            <p>
-              This map is a concept demo for a small Morris Township working
-              group. It presents Neil&rsquo;s TAC hotspot map in a cleaner format,
-              adds contextual linework, and introduces a structure that can
-              later support public input.
-            </p>
-            <p class="subdued">
-              Hotspots come from the TAC source map. Destination markers are
-              sample placeholders for discussion and should be replaced before a
-              wider launch.
-            </p>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>Hotspot Filters</h2>
-              <span class="pill" id="hotspot-total">0 total</span>
+            <div class="tool-group">
+              <div class="tool-group-header">
+                <h3>Hotspot Filters</h3>
+                <span class="pill" id="hotspot-total">0 total</span>
+              </div>
+              <form id="category-filters" class="control-list"></form>
             </div>
-            <form id="category-filters" class="control-list"></form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>Context Layers</h2>
-              <span class="pill">Visible by default</span>
+            <div class="tool-group">
+              <div class="tool-group-header">
+                <h3>Context Layers</h3>
+                <span class="pill">Visible by default</span>
+              </div>
+              <form id="layer-toggles" class="control-list"></form>
             </div>
-            <form id="layer-toggles" class="control-list"></form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>Legend</h2>
-            </div>
-            <div class="legend-block" id="legend"></div>
           </section>
 
           <section class="panel panel-list">
@@ -89,12 +105,15 @@
               <h2>Visible Hotspots</h2>
               <span class="pill" id="visible-count">0 in view</span>
             </div>
+            <p class="panel-subtitle">
+              Records currently visible within the active map view.
+            </p>
             <div id="visible-hotspots" class="hotspot-list" aria-live="polite"></div>
           </section>
 
           <section class="panel panel-detail">
             <div class="panel-header">
-              <h2>Selected Detail</h2>
+              <h2>Map Record</h2>
             </div>
             <div id="detail-panel" class="detail-panel">
               <p class="detail-empty">
@@ -102,6 +121,19 @@
                 category, and source details.
               </p>
             </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Legend</h2>
+                <p class="panel-subtitle">
+                  TAC hotspot points are primary; destination markers remain
+                  placeholder discussion aids.
+                </p>
+              </div>
+            </div>
+            <div class="legend-block" id="legend"></div>
           </section>
 
           <section class="panel panel-future">
@@ -116,23 +148,6 @@
             </div>
           </section>
         </aside>
-
-        <section class="map-column">
-          <div class="map-card">
-            <div class="map-card-header">
-              <div>
-                <p class="eyebrow">Interactive Map</p>
-                <h2>Walkability and Bikeability Review</h2>
-              </div>
-              <p class="map-caption">
-                Hotspots are primary. Context layers remain subdued for
-                orientation. The gray center treatment highlights Morris
-                Township&rsquo;s donut geography.
-              </p>
-            </div>
-            <div id="map" aria-label="Interactive Morris Township planning map"></div>
-          </div>
-        </section>
       </main>
     </div>
 
