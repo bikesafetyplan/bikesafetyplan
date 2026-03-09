@@ -107,6 +107,7 @@ const appState = {
   destinationLayerGroup: null,
   residentLayerGroup: null,
   capturePending: false,
+  captureMarker: null,
 };
 
 const elements = {
@@ -125,6 +126,8 @@ const elements = {
   reportDrawer: document.getElementById("report-drawer"),
   reportForm: document.getElementById("report-form"),
   captureMapPoint: document.getElementById("capture-map-point"),
+  cancelMapCapture: document.getElementById("cancel-map-capture"),
+  captureBanner: document.getElementById("capture-banner"),
   reportLatitude: document.getElementById("report-latitude"),
   reportLongitude: document.getElementById("report-longitude"),
   captureStatus: document.getElementById("capture-status"),
@@ -919,6 +922,7 @@ function bindReportFlow() {
   elements.closeReportDrawer.addEventListener("click", closeReportDrawer);
   elements.drawerBackdrop.addEventListener("click", closeReportDrawer);
   elements.captureMapPoint.addEventListener("click", toggleCoordinateCapture);
+  elements.cancelMapCapture.addEventListener("click", cancelCoordinateCapture);
   elements.reportForm.addEventListener("submit", handleReportSubmit);
 }
 
@@ -932,10 +936,11 @@ function openReportDrawer() {
   elements.reportDrawer.setAttribute("aria-hidden", "false");
 }
 
-function closeReportDrawer() {
-  appState.capturePending = false;
-  elements.captureStatus.textContent =
-    "Coordinates are optional. Use map click capture later for a live workflow.";
+function closeReportDrawer(options = {}) {
+  const { preserveCapture = false } = options;
+  if (!preserveCapture) {
+    resetCoordinateCapture();
+  }
   elements.reportDrawer.classList.remove("is-open");
   elements.drawerBackdrop.classList.remove("is-open");
   elements.reportDrawer.setAttribute("aria-hidden", "true");
@@ -948,10 +953,18 @@ function closeReportDrawer() {
 }
 
 function toggleCoordinateCapture() {
-  appState.capturePending = !appState.capturePending;
-  elements.captureStatus.textContent = appState.capturePending
-    ? "Click once on the map to place a prototype location capture."
-    : "Coordinates are optional. Use map click capture later for a live workflow.";
+  if (appState.capturePending) {
+    cancelCoordinateCapture();
+    return;
+  }
+
+  appState.capturePending = true;
+  elements.captureStatus.textContent =
+    "Map capture is active. Click once on the map to place this report.";
+  elements.captureMapPoint.textContent = "Cancel map capture";
+  elements.captureBanner.hidden = false;
+  document.body.classList.add("map-capture-active");
+  closeReportDrawer({ preserveCapture: true });
 }
 
 function handleMapClickForCapture(event) {
@@ -960,9 +973,56 @@ function handleMapClickForCapture(event) {
   }
   elements.reportLatitude.value = event.latlng.lat.toFixed(5);
   elements.reportLongitude.value = event.latlng.lng.toFixed(5);
+  renderCaptureMarker(event.latlng);
   elements.captureStatus.textContent =
-    "Prototype coordinates captured from the map. In a live release, this step would attach the report to a review queue.";
+    "Prototype coordinates captured from the map. Adjust them manually if needed before submitting for review.";
+  resetCoordinateCapture({ keepStatus: true });
+  openReportDrawer();
+}
+
+function cancelCoordinateCapture() {
+  resetCoordinateCapture();
+  if (elements.reportDrawer.getAttribute("aria-hidden") === "true") {
+    openReportDrawer();
+  }
+}
+
+function resetCoordinateCapture(options = {}) {
+  const { keepStatus = false } = options;
   appState.capturePending = false;
+  elements.captureBanner.hidden = true;
+  document.body.classList.remove("map-capture-active");
+  elements.captureMapPoint.textContent = "Capture from map click";
+  if (!keepStatus) {
+    elements.captureStatus.textContent =
+      "Coordinates are optional. Use map click capture to place the report directly on the map.";
+  }
+}
+
+function renderCaptureMarker(latlng) {
+  if (!appState.captureMarker) {
+    appState.captureMarker = L.circleMarker(latlng, {
+      pane: "residentPane",
+      radius: 8,
+      fillColor: "#ffffff",
+      color: "#27566b",
+      weight: 3,
+      fillOpacity: 0.9,
+      dashArray: "4 3",
+    }).addTo(appState.map);
+    return;
+  }
+
+  appState.captureMarker.setLatLng(latlng);
+}
+
+function clearCaptureMarker() {
+  if (!appState.captureMarker) {
+    return;
+  }
+
+  appState.map.removeLayer(appState.captureMarker);
+  appState.captureMarker = null;
 }
 
 function handleReportSubmit(event) {
@@ -989,9 +1049,8 @@ function handleReportSubmit(event) {
   elements.reportForm.reset();
   elements.reportLatitude.value = "";
   elements.reportLongitude.value = "";
-  appState.capturePending = false;
-  elements.captureStatus.textContent =
-    "Coordinates are optional. Use map click capture later for a live workflow.";
+  clearCaptureMarker();
+  resetCoordinateCapture();
 }
 
 function getResidentCategoryMeta(record) {
