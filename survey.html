@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Morris Township Walking and Biking Survey</title>
+    <title>Morris Township Walking, Rolling, and Cycling Survey</title>
     <meta
       name="description"
-      content="A guided survey page for collecting structured walking and biking input in Morris Township, New Jersey."
+      content="A guided survey page for collecting structured walking, rolling, and cycling input in Morris Township, New Jersey."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,11 +23,12 @@
         <a href="index.html" class="survey-back-link">Back to Planning Map</a>
         <div class="survey-intro">
           <p class="eyebrow">Survey Mode</p>
-          <h1>Morris Township Walking and Biking Survey</h1>
+          <h1>Morris Township Walking, Rolling, and Cycling Survey</h1>
           <p class="lede">
             This survey page is designed for the April input phase. It helps residents
-            describe specific trouble spots and destination connections in a format the
-            planning group can review and map more clearly.
+            describe specific trouble spots and route requests in a format the
+            planning group can review and map more clearly, including trips they want to
+            make by walking, rolling, or cycling.
           </p>
           <p class="masthead-note survey-intro-note">
             Survey responses collected here remain under review. They do not appear as
@@ -48,14 +49,14 @@
             <h3 class="legend-group-title">Two Input Paths</h3>
             <ul class="survey-list">
               <li><strong>Trouble spots</strong>: report a sidewalk gap, crossing problem, visibility issue, speeding concern, or accessibility barrier at a specific location.</li>
-              <li><strong>Destination connections</strong>: describe where you want to get to, what area you are starting from, and what gets in the way.</li>
+              <li><strong>Route requests</strong>: describe a trip you want to make from one area to a destination, how you want to travel, and what gets in the way.</li>
             </ul>
           </section>
           <section>
             <h3 class="legend-group-title">How to Answer Well</h3>
             <ul class="survey-example-list">
               <li><strong>Unsafe crossing at Columbia Turnpike near Woodland School</strong></li>
-              <li><strong>Need safer walking route from neighborhood to Kings</strong></li>
+              <li><strong>I want to go from my neighborhood to ShopRite by cycling</strong></li>
               <li><strong>Missing sidewalk segment on this block</strong></li>
             </ul>
           </section>
@@ -69,7 +70,7 @@
               <p class="eyebrow">Survey Map</p>
               <h2>Place Your Input on the Map</h2>
               <p class="panel-subtitle">
-                Sample under-review survey records are shown for orientation. Official hotspot points remain visible but subdued.
+                Sample under-review route requests and trouble-spot reports are shown for orientation. Official hotspot points remain visible but subdued.
               </p>
             </div>
           </div>
@@ -87,9 +88,9 @@
           <div class="panel-header">
             <div>
               <p class="eyebrow">Survey Intake</p>
-              <h2>Share a Specific Location</h2>
+              <h2>Share a Trouble Spot or Route Request</h2>
               <p class="panel-subtitle">
-                This is still a prototype workflow. Responses are framed as under-review survey entries.
+                This is still a prototype workflow. Responses are framed as under-review trouble-spot reports or route requests.
               </p>
             </div>
           </div>
@@ -104,7 +105,7 @@
               <span class="field-label">Submission type</span>
               <select id="submission-type" name="submission_type" required>
                 <option value="hotspot">Report a trouble spot</option>
-                <option value="destination_request">Request a destination connection</option>
+                <option value="destination_request">Request a route to a destination</option>
               </select>
             </label>
 
@@ -124,8 +125,8 @@
             </label>
 
             <label class="field" id="desired-destination-field" hidden>
-              <span class="field-label">Where do you want to get to</span>
-              <input id="desired-destination" type="text" name="desired_destination" placeholder="Example: Kings, Woodland School, or Patriots' Path access" />
+              <span class="field-label">Where do you want to go</span>
+              <input id="desired-destination" type="text" name="desired_destination" placeholder="Example: ShopRite, Kings, Woodland School, or Patriots' Path access" />
             </label>
 
             <div class="field">
@@ -150,18 +151,24 @@
             </label>
 
             <fieldset class="field fieldset-reset">
-              <legend class="field-label">Concern mode</legend>
+              <legend class="field-label" id="mode-label">How are you trying to make this trip</legend>
               <div class="checkbox-grid">
                 <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="walking" /> <span>Walking</span></label>
-                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="biking" /> <span>Biking</span></label>
-                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="accessibility" /> <span>Accessibility</span></label>
-                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="safety" /> <span>Safety</span></label>
+                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="rolling" /> <span>Rolling</span></label>
+                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="cycling" /> <span>Cycling</span></label>
+                <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="safety" /> <span>Safety emphasis</span></label>
               </div>
+              <p class="field-help" id="mode-help">
+                Rolling is mainly for wheelchairs, strollers, mobility devices, and other wheeled travel.
+              </p>
+              <p class="field-help field-error" id="mode-error" hidden>
+                Choose at least one mode so the planning group can understand the trip or concern you are describing.
+              </p>
             </fieldset>
 
             <label class="field">
               <span class="field-label">Additional notes (optional)</span>
-              <textarea name="additional_notes" rows="3" placeholder="Optional notes about walking, biking, accessibility, or safety concerns."></textarea>
+              <textarea name="additional_notes" rows="3" placeholder="Optional notes about walking, rolling, cycling, or safety concerns."></textarea>
             </label>
 
             <div class="drawer-footer">
@@ -185,7 +192,7 @@
           The current planning map reflects official working-group data. Survey responses collected during this phase are under review and do not instantly become official records.
         </p>
         <p class="survey-helper">
-          This separation helps the planning group preserve trust in the official map while still gathering useful location-specific input for April survey analysis and workshop preparation.
+          This separation helps the planning group preserve trust in the official map while still gathering useful trouble-spot reports and route requests for April survey analysis and workshop preparation.
         </p>
       </section>
     </div>

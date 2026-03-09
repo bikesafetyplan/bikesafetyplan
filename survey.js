@@ -15,6 +15,19 @@ const DESTINATION_CATEGORIES = [
   { id: "business", label: "Business area", color: "#76604a" },
 ];
 
+const HOTSPOT_MODES = [
+  { value: "walking", label: "Walking" },
+  { value: "rolling", label: "Rolling" },
+  { value: "cycling", label: "Cycling" },
+  { value: "safety", label: "Safety emphasis" },
+];
+
+const DESTINATION_MODES = [
+  { value: "walking", label: "Walking" },
+  { value: "rolling", label: "Rolling" },
+  { value: "cycling", label: "Cycling" },
+];
+
 const surveyState = {
   map: null,
   capturePending: false,
@@ -36,6 +49,10 @@ const elements = {
   desiredDestination: document.getElementById("desired-destination"),
   descriptionLabel: document.getElementById("description-label"),
   descriptionText: document.getElementById("description-text"),
+  modeLabel: document.getElementById("mode-label"),
+  modeHelp: document.getElementById("mode-help"),
+  modeError: document.getElementById("mode-error"),
+  concernModeInputs: Array.from(document.querySelectorAll('input[name="concern_mode"]')),
   captureMapPoint: document.getElementById("survey-capture-map-point"),
   cancelCapture: document.getElementById("survey-cancel-capture"),
   captureBanner: document.getElementById("survey-capture-banner"),
@@ -205,6 +222,13 @@ function bindForm() {
   elements.captureMapPoint.addEventListener("click", toggleCaptureMode);
   elements.cancelCapture.addEventListener("click", cancelCaptureMode);
   elements.form.addEventListener("submit", handleSubmit);
+  elements.concernModeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      if (getSelectedModes().length > 0) {
+        elements.modeError.hidden = true;
+      }
+    });
+  });
 }
 
 function renderFormMode() {
@@ -212,17 +236,32 @@ function renderFormMode() {
   const isDestinationMode = mode === "destination_request";
 
   const categories = isDestinationMode ? DESTINATION_CATEGORIES : HOTSPOT_CATEGORIES;
+  const modeOptions = isDestinationMode ? DESTINATION_MODES : HOTSPOT_MODES;
   elements.categoryLabel.textContent = isDestinationMode ? "Destination type" : "Issue type";
-  elements.locationLabel.textContent = isDestinationMode ? "Starting area or nearby location" : "Nearby street or location";
+  elements.locationLabel.textContent = isDestinationMode ? "Approximate start point or nearby location" : "Nearby street or location";
   elements.locationText.placeholder = isDestinationMode
     ? "Example: neighborhood streets south of Woodland Ave"
     : "Example: Columbia Turnpike near Woodland School";
   elements.descriptionLabel.textContent = isDestinationMode ? "What gets in the way" : "Problem description";
   elements.descriptionText.placeholder = isDestinationMode
-    ? "Describe what makes this walking or biking connection difficult."
+    ? "Describe what gets in the way between your starting area and destination."
     : "Describe the location and what feels difficult, unsafe, or incomplete.";
   elements.originAreaField.hidden = !isDestinationMode;
   elements.desiredDestinationField.hidden = !isDestinationMode;
+  elements.originArea.required = isDestinationMode;
+  elements.desiredDestination.required = isDestinationMode;
+  elements.modeLabel.textContent = isDestinationMode
+    ? "How are you trying to make this trip"
+    : "Who does this affect or how is it experienced";
+  elements.modeHelp.textContent = isDestinationMode
+    ? "Rolling is mainly for wheelchairs, strollers, mobility devices, and other wheeled travel."
+    : "Rolling is mainly for wheelchair, stroller, mobility-device, and other wheeled travel concerns.";
+  elements.modeError.hidden = true;
+  if (!surveyState.capturePending && !elements.captureMapPoint.disabled) {
+    elements.captureStatus.textContent = isDestinationMode
+      ? "Coordinates are optional. You can type a location or place a point for the starting area or approximate trip context."
+      : "Coordinates are optional. You can type a location or place a point directly on the map.";
+  }
 
   elements.categorySelect.innerHTML = categories
     .map(
@@ -230,6 +269,30 @@ function renderFormMode() {
         `<option value="${escapeHtml(category.id)}">${escapeHtml(category.label)}</option>`,
     )
     .join("");
+
+  elements.concernModeInputs.forEach((input, index) => {
+    const option = modeOptions[index];
+    const card = input.closest(".checkbox-card");
+    const labelText = card?.querySelector("span");
+
+    if (!option) {
+      input.checked = false;
+      input.disabled = true;
+      if (card) {
+        card.hidden = true;
+      }
+      return;
+    }
+
+    input.disabled = false;
+    input.value = option.value;
+    if (labelText) {
+      labelText.textContent = option.label;
+    }
+    if (card) {
+      card.hidden = false;
+    }
+  });
 }
 
 function toggleCaptureMode() {
@@ -271,7 +334,9 @@ function cancelCaptureMode() {
   elements.captureBanner.hidden = true;
   elements.captureMapPoint.textContent = "Capture from map click";
   elements.captureStatus.textContent =
-    "Coordinates are optional. You can type a location or place a point directly on the map.";
+    elements.submissionType.value === "destination_request"
+      ? "Coordinates are optional. You can type a location or place a point for the starting area or approximate trip context."
+      : "Coordinates are optional. You can type a location or place a point directly on the map.";
   document.body.classList.remove("map-capture-active");
 }
 
@@ -304,6 +369,18 @@ function clearCaptureMarker() {
 function handleSubmit(event) {
   event.preventDefault();
 
+  const selectedModes = getSelectedModes();
+  if (selectedModes.length === 0) {
+    elements.modeError.hidden = false;
+    const firstEnabledInput = elements.concernModeInputs.find((input) => !input.disabled);
+    if (firstEnabledInput) {
+      firstEnabledInput.focus();
+    }
+    return;
+  }
+
+  elements.modeError.hidden = true;
+
   const formData = new FormData(elements.form);
   const mode = formData.get("submission_type");
   const payload = {
@@ -312,7 +389,7 @@ function handleSubmit(event) {
     category: formData.get("category"),
     title:
       mode === "destination_request"
-        ? `Connection request to ${formData.get("desired_destination") || "destination"}`
+        ? buildRouteRequestTitle(formData.get("origin_area"), formData.get("desired_destination"), selectedModes)
         : formData.get("location_text"),
     latitude: formData.get("latitude") || null,
     longitude: formData.get("longitude") || null,
@@ -320,7 +397,7 @@ function handleSubmit(event) {
     origin_area: formData.get("origin_area") || "",
     description: formData.get("description"),
     desired_destination: formData.get("desired_destination") || "",
-    concern_mode: formData.getAll("concern_mode"),
+    concern_mode: selectedModes,
     review_status: "under_review",
     submitted_at: new Date().toISOString().slice(0, 10),
     additional_notes: formData.get("additional_notes") || "",
@@ -329,7 +406,7 @@ function handleSubmit(event) {
   elements.confirmation.hidden = false;
   elements.confirmationText.textContent =
     mode === "destination_request"
-      ? `Prototype destination request captured for review: ${payload.origin_area || payload.location_text} to ${payload.desired_destination || "destination not specified"}. This is not yet being stored live.`
+      ? `Prototype route request captured for review: from ${payload.origin_area || payload.location_text || "starting area not specified"} to ${payload.desired_destination || "destination not specified"} by ${formatModeList(payload.concern_mode)}. This is not yet being stored live.`
       : `Prototype trouble-spot report captured for review: ${payload.location_text || "location not specified"}. This is not yet being stored live.`;
 
   elements.form.reset();
@@ -342,6 +419,16 @@ function handleSubmit(event) {
 
 function buildSurveyPopup(record) {
   const category = getSurveyCategory(record);
+  if (record.submission_type === "destination_request") {
+    return `
+      <div class="map-popup">
+        <h3>${escapeHtml(record.title)}</h3>
+        <p>Route request · Under review</p>
+        <p>From ${escapeHtml(record.origin_area || record.location_text || "starting area not specified")} to ${escapeHtml(record.desired_destination || "destination not specified")} by ${escapeHtml(formatModeList(record.concern_mode || []))}</p>
+      </div>
+    `;
+  }
+
   return `
     <div class="map-popup">
       <h3>${escapeHtml(record.title)}</h3>
@@ -387,6 +474,50 @@ function hideMapFailure() {
 function disableMapCapture(message) {
   elements.captureMapPoint.disabled = true;
   elements.captureStatus.textContent = message;
+}
+
+function getSelectedModes() {
+  return elements.concernModeInputs
+    .filter((input) => !input.disabled && input.checked)
+    .map((input) => input.value);
+}
+
+function buildRouteRequestTitle(originArea, destination, modes) {
+  const fromText = originArea ? `From ${originArea}` : "Route request";
+  const destinationText = destination ? `to ${destination}` : "to destination";
+  const modeText = modes.length > 0 ? `by ${formatModeList(modes)}` : "";
+  return `${fromText} ${destinationText}${modeText ? ` ${modeText}` : ""}`;
+}
+
+function formatModeList(values) {
+  const labels = values
+    .map((value) => formatModeValue(value))
+    .filter(Boolean);
+
+  if (labels.length === 0) {
+    return "unspecified mode";
+  }
+
+  if (labels.length === 1) {
+    return labels[0];
+  }
+
+  if (labels.length === 2) {
+    return `${labels[0]} and ${labels[1]}`;
+  }
+
+  return `${labels.slice(0, -1).join(", ")}, and ${labels.at(-1)}`;
+}
+
+function formatModeValue(value) {
+  const labels = {
+    walking: "walking",
+    rolling: "rolling",
+    cycling: "cycling",
+    safety: "safety emphasis",
+  };
+
+  return labels[value] || formatCategoryLabel(value).toLowerCase();
 }
 
 function formatCategoryLabel(value) {
