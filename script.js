@@ -93,6 +93,9 @@ const REVIEW_LAYER_GROUPS = [
   },
 ];
 
+const SITE_ACCESS_PASSPHRASE = "MorrisTwpReview2026";
+const SITE_ACCESS_STORAGE_KEY = "morris_township_map_access";
+
 const appState = {
   map: null,
   hotspotEntries: [],
@@ -107,6 +110,7 @@ const appState = {
   destinationLayerGroup: null,
   residentLayerGroup: null,
   capturePending: false,
+  accessUnlocked: false,
 };
 
 const elements = {
@@ -129,9 +133,14 @@ const elements = {
   reportLongitude: document.getElementById("report-longitude"),
   captureStatus: document.getElementById("capture-status"),
   reportFeedback: document.getElementById("report-feedback"),
+  accessGate: document.getElementById("access-gate"),
+  accessGateForm: document.getElementById("access-gate-form"),
+  accessPassword: document.getElementById("access-password"),
+  accessFeedback: document.getElementById("access-feedback"),
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeAccessGate();
   init().catch((error) => {
     console.error(error);
     elements.detailPanel.innerHTML =
@@ -923,8 +932,12 @@ function bindReportFlow() {
 }
 
 function openReportDrawer() {
+  if (!appState.accessUnlocked) {
+    return;
+  }
   elements.reportDrawer.classList.add("is-open");
   elements.drawerBackdrop.hidden = false;
+  document.body.classList.add("is-drawer-open");
   requestAnimationFrame(() => {
     elements.drawerBackdrop.classList.add("is-open");
   });
@@ -938,6 +951,7 @@ function closeReportDrawer() {
   elements.reportDrawer.classList.remove("is-open");
   elements.drawerBackdrop.classList.remove("is-open");
   elements.reportDrawer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("is-drawer-open");
   setTimeout(() => {
     if (!elements.drawerBackdrop.classList.contains("is-open")) {
       elements.drawerBackdrop.hidden = true;
@@ -1012,6 +1026,39 @@ function formatCategoryLabel(value) {
 
 function humanizeReviewStatus(status) {
   return formatCategoryLabel(status || "under_review");
+}
+
+function initializeAccessGate() {
+  const unlocked = window.localStorage.getItem(SITE_ACCESS_STORAGE_KEY) === "granted";
+  if (unlocked) {
+    unlockSite();
+  } else {
+    document.body.classList.add("is-locked");
+    elements.accessGate.hidden = false;
+  }
+
+  elements.accessGateForm.addEventListener("submit", handleAccessSubmit);
+}
+
+function handleAccessSubmit(event) {
+  event.preventDefault();
+  const value = elements.accessPassword.value.trim();
+  if (value === SITE_ACCESS_PASSPHRASE) {
+    window.localStorage.setItem(SITE_ACCESS_STORAGE_KEY, "granted");
+    unlockSite();
+    return;
+  }
+
+  elements.accessFeedback.textContent = "Passphrase not recognized. Please check with the working group.";
+  elements.accessPassword.select();
+}
+
+function unlockSite() {
+  appState.accessUnlocked = true;
+  document.body.classList.remove("is-locked");
+  elements.accessGate.hidden = true;
+  elements.accessFeedback.textContent =
+    "Share the passphrase only with the working group until the site is approved.";
 }
 
 function getHotspotCategory(categoryId) {

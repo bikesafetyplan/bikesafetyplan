@@ -23,6 +23,29 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="access-gate" id="access-gate" aria-labelledby="access-gate-title">
+      <div class="access-gate-card">
+        <p class="eyebrow">Draft Access</p>
+        <h1 id="access-gate-title" class="gate-title">Morris Township Planning Map</h1>
+        <p class="gate-copy">
+          This working-group draft remains limited while the map is under review.
+        </p>
+        <p class="gate-copy">
+          Enter the draft passphrase to view the site. This screen adds light friction only and is not a secure access-control system.
+        </p>
+        <form id="access-gate-form" class="access-gate-form">
+          <label class="field">
+            <span class="field-label">Draft passphrase</span>
+            <input type="password" id="access-password" name="access_password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="future-button future-button-live">Enter Draft Site</button>
+          <p class="field-help" id="access-feedback">
+            Share the passphrase only with the working group until the site is approved.
+          </p>
+        </form>
+      </div>
+    </div>
+
     <div class="page-shell">
       <header class="page-header">
         <p class="eyebrow">Working Group Prototype</p>
@@ -255,13 +278,13 @@
           <input type="text" name="desired_destination" placeholder="Example: Woodland School or Frelinghuysen Arboretum" />
         </label>
 
-        <fieldset class="field">
+        <fieldset class="field fieldset-reset">
           <legend class="field-label">Concern mode</legend>
           <div class="checkbox-grid">
-            <label><input type="checkbox" name="concern_mode" value="walking" /> Walking</label>
-            <label><input type="checkbox" name="concern_mode" value="biking" /> Biking</label>
-            <label><input type="checkbox" name="concern_mode" value="accessibility" /> Accessibility</label>
-            <label><input type="checkbox" name="concern_mode" value="safety" /> Safety</label>
+            <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="walking" /> <span>Walking</span></label>
+            <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="biking" /> <span>Biking</span></label>
+            <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="accessibility" /> <span>Accessibility</span></label>
+            <label class="checkbox-card"><input type="checkbox" name="concern_mode" value="safety" /> <span>Safety</span></label>
           </div>
         </fieldset>
 
