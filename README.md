@@ -7,6 +7,7 @@ Static Leaflet prototype for reviewing Morris Township walkability and bikeabili
 - `index.html` sets up the page shell, sidebar sections, and Leaflet map container.
 - `styles.css` contains the responsive layout and the civic/editorial visual styling.
 - `script.js` loads the local GeoJSON files, initializes the Leaflet map, and manages filters, layer toggles, the visible-hotspots list, popups, and the detail panel.
+- `vendor/leaflet/` stores a local copy of Leaflet JS/CSS and image assets so the live map does not depend on a third-party CDN for bootstrap.
 - `data/hotspots.geojson` stores the TAC hotspot points normalized into the project taxonomy.
 - `data/destinations.geojson` stores curated reference destinations used to interpret hotspot demand and travel patterns.
 - `data/context-lines.geojson` stores sidewalk, trail, crosswalk, and township-border linework for subdued map context.
@@ -32,6 +33,8 @@ Then visit [http://localhost:8000](http://localhost:8000).
 5. Save the setting and wait for GitHub Pages to publish the site.
 
 No build process is required. All paths are relative, so the site works directly from the repository root.
+
+Core map assets are vendored locally in `vendor/leaflet/` to reduce the chance of live map bootstrap failures caused by third-party CDN availability.
 
 ## Replacing the Sample and TAC Data Later
 

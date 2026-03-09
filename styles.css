@@ -580,6 +580,12 @@ h2 {
   outline: none;
 }
 
+.text-button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -789,6 +795,12 @@ h2 {
   font-size: 1.55rem;
 }
 
+.map-stage {
+  position: relative;
+  height: 100%;
+  min-height: 680px;
+}
+
 #map {
   width: 100%;
   min-height: 680px;
@@ -796,6 +808,32 @@ h2 {
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(29, 42, 52, 0.1);
+}
+
+.map-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(29, 42, 52, 0.1);
+  background:
+    linear-gradient(180deg, rgba(247, 242, 232, 0.96), rgba(244, 240, 231, 0.98)),
+    rgba(244, 240, 231, 0.98);
+  text-align: center;
+}
+
+.map-status[hidden] {
+  display: none;
+}
+
+.map-status-copy {
+  max-width: 28rem;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
 .leaflet-container {
@@ -865,6 +903,10 @@ h2 {
   #map {
     min-height: 520px;
   }
+
+  .map-stage {
+    min-height: 520px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -916,6 +958,10 @@ h2 {
   }
 
   #map {
+    min-height: 430px;
+  }
+
+  .map-stage {
     min-height: 430px;
   }
 

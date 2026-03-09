@@ -119,6 +119,7 @@ const elements = {
   visibleHotspots: document.getElementById("visible-hotspots"),
   detailPanel: document.getElementById("detail-panel"),
   referenceContent: document.getElementById("reference-content"),
+  mapStatus: document.getElementById("map-status"),
   openReportDrawer: document.getElementById("open-report-drawer"),
   closeReportDrawer: document.getElementById("close-report-drawer"),
   drawerBackdrop: document.getElementById("drawer-backdrop"),
@@ -136,6 +137,7 @@ const elements = {
 document.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
     console.error(error);
+    showMapFailure();
     elements.detailPanel.innerHTML =
       '<p class="detail-empty">The map data could not be loaded. Check the console and confirm the site is running from a local or hosted web server.</p>';
   });
@@ -153,6 +155,13 @@ async function init() {
   renderLayerToggles();
   renderReviewLayerToggles();
   renderMapReference();
+  if (!ensureLeafletAvailable()) {
+    elements.detailPanel.innerHTML =
+      '<p class="detail-empty">The planning records are available, but the interactive map could not be initialized right now.</p>';
+    bindReportFlow();
+    return;
+  }
+
   initializeMap();
   buildContextLayers(contextLines.features);
   buildDestinations(destinations.features);
@@ -221,6 +230,7 @@ function initializeMap() {
 
   map.on("click", handleMapClickForCapture);
   appState.map = map;
+  hideMapFailure();
 }
 
 function buildHotspots(features) {
@@ -1087,6 +1097,31 @@ function getHotspotCategory(categoryId) {
       description: "",
     }
   );
+}
+
+function ensureLeafletAvailable() {
+  if (typeof window.L !== "undefined") {
+    return true;
+  }
+
+  showMapFailure();
+  return false;
+}
+
+function showMapFailure() {
+  elements.mapStatus.hidden = false;
+  elements.captureMapPoint.disabled = true;
+  elements.captureStatus.textContent =
+    "Map click capture is unavailable until the interactive map loads.";
+}
+
+function hideMapFailure() {
+  elements.mapStatus.hidden = true;
+  elements.captureMapPoint.disabled = false;
+  if (!appState.capturePending) {
+    elements.captureStatus.textContent =
+      "Coordinates are optional. Use map click capture to place the report directly on the map.";
+  }
 }
 
 function escapeHtml(value) {
