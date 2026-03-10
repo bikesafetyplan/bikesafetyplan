@@ -58,23 +58,94 @@ The shipped prototype reads only local GeoJSON files at runtime. To replace the 
 
 The destination layer is intentionally small and curated. It should function as a civic reference set, not an exhaustive amenity inventory.
 
-## Future Public Input Prototype
+## Live Submission Path: Google Forms
 
-This phase adds a static prototype of a future resident-input workflow. The public-input form, under-review map layer, and planning-group summary panel are included to demonstrate how submissions could be captured and reviewed while remaining separate from official TAC planning data.
+The site now treats Google Forms as the first live submission backend. The public website remains the map and survey interface, while the final submission step opens a Google Form in a new tab for actual intake, optional photo upload, and later review by the planning group.
 
-The intended next live step is to connect the front-end submission form to a lightweight review pipeline such as Google Apps Script to Google Sheets. In that setup, new reports would enter with `review_status=under_review`, staff would review them outside the public map, and approved records could later be exported back into the site data.
+This setup keeps the public flow lightweight:
+- the website captures map context, trip intent, and structured descriptions
+- Google Forms stores the submission
+- Google Drive stores uploaded photos from the form's file-upload question
+- the planning group reviews submissions before anything enters the official planning record
 
-The map is meant to be read in a clear hierarchy: official planning data forms the current working base, resident submissions remain separate and under review, and context layers support orientation rather than equal evidentiary weight.
+Current limitations of this approach:
+- file upload requires the respondent to sign in with a Google account
+- photo upload happens only in Google Forms, not on the website
+- Google Form submissions do not automatically appear back on the public map
+
+The map is meant to be read in a clear hierarchy: official planning data forms the current working base, survey responses remain separate and under review, and context layers support orientation rather than equal evidentiary weight.
+
+## Recommended Google Form Structure
+
+Use one Google Form with branching based on the first question:
+
+1. `Submission type`
+   - `Report a problem spot`
+   - `Request a route or destination connection`
+2. Branch to one of two sections.
+
+Problem-spot section:
+- `Issue category`
+- `How is this experienced?`
+- `Location description`
+- `Nearby intersection or address`
+- `Map coordinates (optional)`
+- `Describe the problem`
+- `Photo upload (optional)`
+- `Contact information (optional)`
+
+Route-request section:
+- `Destination type`
+- `How are you trying to make this trip?`
+- `From what area are you starting?`
+- `Where do you want to go?`
+- `Location or nearby intersection`
+- `Map coordinates (optional)`
+- `What gets in the way?`
+- `Photo upload (optional)`
+- `Contact information (optional)`
+
+## Wiring Survey Mode to Google Forms
+
+`survey.js` includes a `FORM_CONFIG` object near the top of the file. That object is the single place to connect the live Google Form.
+
+To wire it:
+1. Create the Google Form and its branched sections.
+2. In Google Forms, choose `Get pre-filled link`.
+3. Enter sample answers, generate the link, and inspect the resulting query string.
+4. Copy each `entry.<id>` value into the matching field inside `FORM_CONFIG.googleFormFieldIds`.
+5. Paste the responder URL into `FORM_CONFIG.formBaseUrl`.
+6. Set `FORM_CONFIG.enabled` to `true`.
+
+Suggested field mapping from the site:
+- `submission_type`
+- `category`
+- `location_text`
+- `coordinates`
+- `origin_area`
+- `desired_destination`
+- `description`
+- `concern_mode`
+- `concern_mode_summary`
+- `additional_notes`
+
+Notes:
+- `concern_mode` can be mapped to a checkbox-style Google Form field if the pre-filled link supports repeated values cleanly.
+- `concern_mode_summary` exists as a safer fallback for a single text field if checkbox prefill is too brittle.
+- `Photo upload` and `Contact information` should stay inside Google Forms as manual entry.
+
+This setup can later be replaced by a custom backend without changing the public-facing survey structure on the site.
 
 ## Survey Mode
 
 `survey.html` is the guided intake page for the April survey phase. It is intentionally distinct from the official planning viewer in `index.html`.
 
 Survey Mode:
-- collects two structured types of resident input: trouble spots and destination connections
+- collects two structured types of resident input: problem spots and route / destination requests
 - supports map-assisted point capture or typed location text
 - frames all responses as `under_review`
-- uses `data/survey-sample-submissions.json` as a prototype sample layer rather than live public storage
+- opens the live Google Form for final submission when `FORM_CONFIG` is wired in `survey.js`
+- uses `data/survey-sample-submissions.json` as a sample under-review layer rather than live public storage
 
 The planning viewer and Survey Mode are intentionally labeled as different phases of the same process:
 - `Official Planning View` = working-group reference and orientation
@@ -85,4 +156,4 @@ The planning viewer and Survey Mode are intentionally labeled as different phase
 1. Review the imported hotspot points and confirm the category mapping from the TAC source map.
 2. Keep the destination layer limited to stable schools, parks, trailheads, museums, and civic sites that help explain walking and biking demand.
 3. Decide whether the full context linework is useful as-is or should be thinned into a smaller set of overlays for easier public reading.
-4. If the working group wants to test real submissions, connect the prototype form to Google Sheets or another lightweight review queue before exposing anything publicly.
+4. When the working group is ready for live intake, connect `survey.js` to the Google Form responder URL and pre-filled field IDs before exposing the form publicly.

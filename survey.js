@@ -28,6 +28,36 @@ const DESTINATION_MODES = [
   { value: "cycling", label: "Cycling" },
 ];
 
+// Paste the real Google Form responder URL and prefill field IDs here when the live form is created.
+const FORM_CONFIG = {
+  enabled: false,
+  formBaseUrl: "",
+  prefillFields: [
+    "submission_type",
+    "category",
+    "location_text",
+    "coordinates",
+    "origin_area",
+    "desired_destination",
+    "description",
+    "concern_mode",
+    "concern_mode_summary",
+    "additional_notes",
+  ],
+  googleFormFieldIds: {
+    submission_type: "",
+    category: "",
+    location_text: "",
+    coordinates: "",
+    origin_area: "",
+    desired_destination: "",
+    description: "",
+    concern_mode: "",
+    concern_mode_summary: "",
+    additional_notes: "",
+  },
+};
+
 const surveyState = {
   map: null,
   baseTileLayer: null,
@@ -62,6 +92,7 @@ const elements = {
   latitude: document.getElementById("survey-latitude"),
   longitude: document.getElementById("survey-longitude"),
   confirmation: document.getElementById("survey-confirmation"),
+  confirmationTitle: document.getElementById("survey-confirmation-title"),
   confirmationText: document.getElementById("survey-confirmation-text"),
 };
 
@@ -409,11 +440,21 @@ function handleSubmit(event) {
     additional_notes: formData.get("additional_notes") || "",
   };
 
+  const googleFormUrl = buildGoogleFormUrl(payload);
+
   elements.confirmation.hidden = false;
-  elements.confirmationText.textContent =
-    mode === "destination_request"
-      ? `Prototype route request captured for review: from ${payload.origin_area || payload.location_text || "starting area not specified"} to ${payload.desired_destination || "destination not specified"} by ${formatModeList(payload.concern_mode)}. This is not yet being stored live.`
-      : `Prototype trouble-spot report captured for review: ${payload.location_text || "location not specified"}. This is not yet being stored live.`;
+  if (googleFormUrl) {
+    elements.confirmationTitle.textContent = "Submission Form Opened";
+    elements.confirmationText.textContent =
+      payload.submission_type === "destination_request"
+        ? `The Google Form opened in a new tab with your route request prefilled: from ${payload.origin_area || payload.location_text || "starting area not specified"} to ${payload.desired_destination || "destination not specified"} by ${formatModeList(payload.concern_mode)}. Optional photo upload and any contact details are completed there.`
+        : `The Google Form opened in a new tab with your trouble-spot report prefilled for ${payload.location_text || "location not specified"}. Optional photo upload and any contact details are completed there.`;
+    window.open(googleFormUrl, "_blank", "noopener,noreferrer");
+  } else {
+    elements.confirmationTitle.textContent = "Google Form Not Yet Connected";
+    elements.confirmationText.textContent =
+      "Survey Mode is ready to hand off to a Google Form, but the live form URL and field IDs have not been configured yet. When connected, this same step will open the external form with your map context carried over.";
+  }
 
   elements.form.reset();
   renderFormMode();
@@ -421,6 +462,75 @@ function handleSubmit(event) {
   elements.longitude.value = "";
   clearCaptureMarker();
   cancelCaptureMode();
+}
+
+function buildGoogleFormUrl(payload) {
+  if (!FORM_CONFIG.enabled || !FORM_CONFIG.formBaseUrl) {
+    return "";
+  }
+
+  let url;
+  try {
+    url = new URL(FORM_CONFIG.formBaseUrl);
+  } catch (error) {
+    console.error("Invalid Google Form URL:", error);
+    return "";
+  }
+
+  FORM_CONFIG.prefillFields.forEach((fieldName) => {
+    const fieldId = FORM_CONFIG.googleFormFieldIds[fieldName];
+    if (!fieldId) {
+      return;
+    }
+
+    const values = getPrefillValues(fieldName, payload);
+    if (values.length === 0) {
+      return;
+    }
+
+    values.forEach((value) => {
+      url.searchParams.append(fieldId, value);
+    });
+  });
+
+  return url.toString();
+}
+
+function getPrefillValues(fieldName, payload) {
+  switch (fieldName) {
+    case "submission_type":
+      return [payload.submission_type === "destination_request" ? "Request a route or destination connection" : "Report a problem spot"];
+    case "category":
+      return [getSurveyCategory(payload).label];
+    case "location_text":
+      return payload.location_text ? [payload.location_text] : [];
+    case "coordinates": {
+      const coordinates = formatCoordinates(payload.latitude, payload.longitude);
+      return coordinates ? [coordinates] : [];
+    }
+    case "origin_area":
+      return payload.origin_area ? [payload.origin_area] : [];
+    case "desired_destination":
+      return payload.desired_destination ? [payload.desired_destination] : [];
+    case "description":
+      return payload.description ? [payload.description] : [];
+    case "concern_mode":
+      return Array.isArray(payload.concern_mode) ? payload.concern_mode.map(formatModeForForm) : [];
+    case "concern_mode_summary":
+      return payload.concern_mode?.length ? [formatModeList(payload.concern_mode)] : [];
+    case "additional_notes":
+      return payload.additional_notes ? [payload.additional_notes] : [];
+    default:
+      return [];
+  }
+}
+
+function formatCoordinates(latitude, longitude) {
+  if (!latitude || !longitude) {
+    return "";
+  }
+
+  return `${latitude}, ${longitude}`;
 }
 
 function buildSurveyPopup(record) {
@@ -509,6 +619,17 @@ function getSelectedModes() {
   return elements.concernModeInputs
     .filter((input) => !input.disabled && input.checked)
     .map((input) => input.value);
+}
+
+function formatModeForForm(value) {
+  const labels = {
+    walking: "Walking",
+    rolling: "Rolling",
+    cycling: "Cycling",
+    safety: "Safety emphasis",
+  };
+
+  return labels[value] || formatCategoryLabel(value);
 }
 
 function buildRouteRequestTitle(originArea, destination, modes) {
