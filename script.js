@@ -544,55 +544,67 @@ function renderMapReference() {
   ).join("");
 
   elements.referenceContent.innerHTML = `
-    <section class="legend-section">
-      <h3 class="legend-group-title">Data Status</h3>
-      <div class="legend-items">
-        <div class="legend-item">
-          <span class="swatch" style="background:#9e3a35"></span>
-          <span>Official planning data: TAC and working-group records used as the current planning base.</span>
+    <div class="reference-summary">
+      <p class="reference-summary-line">Official planning data is the primary working record on this page.</p>
+      <p class="reference-summary-line">Survey input remains under review and separate from the official planning map.</p>
+      <p class="reference-summary-line">Reference destinations and context layers support interpretation rather than equal evidentiary weight.</p>
+    </div>
+    <details class="reference-details" open>
+      <summary class="reference-toggle">Data Status</summary>
+      <div class="legend-section">
+        <div class="legend-items">
+          <div class="legend-item">
+            <span class="swatch" style="background:#9e3a35"></span>
+            <span>Official planning data: TAC and working-group records used as the current planning base.</span>
+          </div>
+          <div class="legend-item">
+            <span class="swatch" style="background:#ffffff; box-shadow: 0 0 0 2px #6b7a8a"></span>
+            <span>Resident input / under review: sample submissions held apart from the official map.</span>
+          </div>
+          <div class="legend-item">
+            <span class="swatch" style="background:#274c5e"></span>
+            <span>Reference destinations: civic anchors used to interpret where people are trying to go.</span>
+          </div>
+          <div class="legend-item">
+            <span class="swatch-line" style="border-top-color:#4b5d78"></span>
+            <span>Context layers: sidewalks, trails, borders, and crosswalks shown for orientation.</span>
+          </div>
         </div>
-        <div class="legend-item">
-          <span class="swatch" style="background:#ffffff; box-shadow: 0 0 0 2px #6b7a8a"></span>
-          <span>Resident input / under review: sample submissions held apart from the official map.</span>
+      </div>
+    </details>
+    <details class="reference-details">
+      <summary class="reference-toggle">Map Symbols</summary>
+      <div class="legend-section">
+        <div>
+          <h4 class="legend-group-title">Official Planning Data</h4>
+          <div class="legend-items">${hotspotItems}</div>
         </div>
-        <div class="legend-item">
-          <span class="swatch" style="background:#274c5e"></span>
-          <span>Reference destinations: civic anchors used to interpret where people are trying to go.</span>
+        <div>
+          <h4 class="legend-group-title">Reference Destinations</h4>
+          <div class="legend-items">${destinationItems}</div>
         </div>
-        <div class="legend-item">
-          <span class="swatch-line" style="border-top-color:#4b5d78"></span>
-          <span>Context layers: sidewalks, trails, borders, and crosswalks shown for orientation.</span>
+        <div>
+          <h4 class="legend-group-title">Resident Input / Under Review</h4>
+          <div class="legend-items">${reviewItems}</div>
+        </div>
+        <div>
+          <h4 class="legend-group-title">Context</h4>
+          <div class="legend-items">${contextItems}</div>
         </div>
       </div>
-    </section>
-    <section class="legend-section">
-      <h3 class="legend-group-title">Map Symbols</h3>
-      <div>
-        <h4 class="legend-group-title">Official Planning Data</h4>
-        <div class="legend-items">${hotspotItems}</div>
+    </details>
+    <details class="reference-details">
+      <summary class="reference-toggle">Use in This Phase</summary>
+      <div class="legend-section">
+        <p class="legend-copy">Use this map to review known issues, compare them with destinations and context, and prepare survey and workshop questions. It is not a complete inventory of every walking or biking condition in the township.</p>
       </div>
-      <div>
-        <h4 class="legend-group-title">Reference Destinations</h4>
-        <div class="legend-items">${destinationItems}</div>
+    </details>
+    <details class="reference-details">
+      <summary class="reference-toggle">Map Context</summary>
+      <div class="legend-section">
+        <p class="legend-copy">The central gray mask de-emphasizes Morristown for this Morris Township-focused discussion. It is not an official boundary.</p>
       </div>
-      <div>
-        <h4 class="legend-group-title">Resident Input / Under Review</h4>
-        <div class="legend-items">${reviewItems}</div>
-      </div>
-      <div>
-        <h4 class="legend-group-title">Context</h4>
-        <div class="legend-items">${contextItems}</div>
-      </div>
-    </section>
-    <section class="legend-section">
-      <h3 class="legend-group-title">Use in This Phase</h3>
-      <p class="legend-copy">Use this map to review known issues, compare them with destinations and context, and prepare survey and workshop questions.</p>
-      <p class="legend-copy">Do not read it as a complete inventory of every walking or biking condition in the township.</p>
-    </section>
-    <section class="legend-section">
-      <h3 class="legend-group-title">Map Context</h3>
-      <p class="legend-copy">The central gray mask is a visual cue to de-emphasize Morristown for this Morris Township-focused discussion. It is not an official boundary.</p>
-    </section>
+    </details>
   `;
 }
 
@@ -877,13 +889,15 @@ function renderReviewSummary(records) {
   });
 
   elements.referenceContent.insertAdjacentHTML("beforeend", `
-    <section class="summary-group">
-      <h3 class="summary-title">Review Summary</h3>
-      <p class="legend-copy">Prototype planning-group view of recurring resident input now under review.</p>
-    </section>
-    ${renderSummaryGroup("Counts by issue", categoryCounts, formatCategoryLabel)}
-    ${renderSummaryGroup("Repeated locations", locationCounts, null)}
-    ${renderSummaryGroup("Requested destinations", destinationCounts, null)}
+    <details class="reference-details">
+      <summary class="reference-toggle">Review Summary</summary>
+      <div class="legend-section">
+        <p class="legend-copy">Prototype planning-group view of recurring resident input now under review.</p>
+      </div>
+      ${renderSummaryGroup("Counts by issue", categoryCounts, formatCategoryLabel)}
+      ${renderSummaryGroup("Repeated locations", locationCounts, null)}
+      ${renderSummaryGroup("Requested destinations", destinationCounts, null)}
+    </details>
   `);
 }
 

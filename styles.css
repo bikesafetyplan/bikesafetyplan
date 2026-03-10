@@ -407,14 +407,11 @@ h2 {
   white-space: nowrap;
 }
 
-.legend-block {
-  display: grid;
-  gap: 14px;
-}
-
 .reference-section {
   display: grid;
-  gap: 18px;
+  gap: 14px;
+  padding-top: 18px;
+  padding-bottom: 18px;
 }
 
 .reference-header {
@@ -423,13 +420,50 @@ h2 {
 
 .reference-flow {
   display: grid;
-  gap: 22px;
+  gap: 12px;
   max-width: 54rem;
+}
+
+.reference-summary {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.reference-summary-line {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.94rem;
+}
+
+.reference-details {
+  border-top: 1px solid rgba(29, 42, 52, 0.08);
+  padding-top: 10px;
+}
+
+.reference-details[open] {
+  padding-bottom: 4px;
+}
+
+.reference-toggle {
+  cursor: pointer;
+  list-style: none;
+  font-family: "Fraunces", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.reference-toggle::-webkit-details-marker {
+  display: none;
 }
 
 .legend-section {
   display: grid;
   gap: 8px;
+  padding-top: 10px;
 }
 
 .legend-group-title {
@@ -458,11 +492,6 @@ h2 {
   gap: 12px;
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.summary-list {
-  display: grid;
-  gap: 14px;
 }
 
 .summary-group {
