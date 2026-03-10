@@ -28,35 +28,13 @@ const DESTINATION_MODES = [
   { value: "cycling", label: "Cycling" },
 ];
 
-// Paste the real Google Form responder URL and prefill field IDs here when the live form is created.
-const FORM_CONFIG = {
+const API_CONFIG = {
   enabled: false,
-  formBaseUrl: "",
-  prefillFields: [
-    "submission_type",
-    "category",
-    "location_text",
-    "coordinates",
-    "origin_area",
-    "desired_destination",
-    "description",
-    "concern_mode",
-    "concern_mode_summary",
-    "additional_notes",
-  ],
-  googleFormFieldIds: {
-    submission_type: "",
-    category: "",
-    location_text: "",
-    coordinates: "",
-    origin_area: "",
-    desired_destination: "",
-    description: "",
-    concern_mode: "",
-    concern_mode_summary: "",
-    additional_notes: "",
-  },
+  baseUrl: "",
 };
+
+const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024;
+const ACCEPTED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const surveyState = {
   map: null,
@@ -94,6 +72,8 @@ const elements = {
   confirmation: document.getElementById("survey-confirmation"),
   confirmationTitle: document.getElementById("survey-confirmation-title"),
   confirmationText: document.getElementById("survey-confirmation-text"),
+  photoUpload: document.getElementById("photo-upload"),
+  submitButton: document.getElementById("survey-submit-button"),
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -403,7 +383,7 @@ function clearCaptureMarker() {
   surveyState.captureMarker = null;
 }
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
   event.preventDefault();
 
   const selectedModes = getSelectedModes();
@@ -418,10 +398,16 @@ function handleSubmit(event) {
 
   elements.modeError.hidden = true;
 
+  const photoFile = elements.photoUpload.files?.[0] || null;
+  const photoError = validatePhotoFile(photoFile);
+  if (photoError) {
+    showConfirmation("Submission Not Sent", photoError, "error");
+    return;
+  }
+
   const formData = new FormData(elements.form);
   const mode = formData.get("submission_type");
   const payload = {
-    id: `draft-${Date.now()}`,
     submission_type: mode,
     category: formData.get("category"),
     title:
@@ -440,97 +426,129 @@ function handleSubmit(event) {
     additional_notes: formData.get("additional_notes") || "",
   };
 
-  const googleFormUrl = buildGoogleFormUrl(payload);
-
-  elements.confirmation.hidden = false;
-  if (googleFormUrl) {
-    elements.confirmationTitle.textContent = "Submission Form Opened";
-    elements.confirmationText.textContent =
-      payload.submission_type === "destination_request"
-        ? `The Google Form opened in a new tab with your route request prefilled: from ${payload.origin_area || payload.location_text || "starting area not specified"} to ${payload.desired_destination || "destination not specified"} by ${formatModeList(payload.concern_mode)}. Optional photo upload and any contact details are completed there.`
-        : `The Google Form opened in a new tab with your trouble-spot report prefilled for ${payload.location_text || "location not specified"}. Optional photo upload and any contact details are completed there.`;
-    window.open(googleFormUrl, "_blank", "noopener,noreferrer");
-  } else {
-    elements.confirmationTitle.textContent = "Google Form Not Yet Connected";
-    elements.confirmationText.textContent =
-      "Survey Mode is ready to hand off to a Google Form, but the live form URL and field IDs have not been configured yet. When connected, this same step will open the external form with your map context carried over.";
+  if (!API_CONFIG.enabled || !API_CONFIG.baseUrl) {
+    showConfirmation(
+      "Live Submission Not Yet Connected",
+      "Survey Mode is ready for a live Cloudflare intake workflow, but the API base URL has not been configured yet. When connected, this same step will submit the report and optional photo directly into the review queue.",
+      "warning",
+    );
+    return;
   }
 
-  elements.form.reset();
-  renderFormMode();
-  elements.latitude.value = "";
-  elements.longitude.value = "";
-  clearCaptureMarker();
-  cancelCaptureMode();
+  try {
+    setSubmitting(true);
+    const submissionResponse = await postJson(`${API_CONFIG.baseUrl}/api/submissions`, {
+      ...payload,
+      photo_present: Boolean(photoFile),
+    });
+
+    if (photoFile) {
+      const uploadResponse = await postJson(
+        `${API_CONFIG.baseUrl}/api/submissions/${encodeURIComponent(submissionResponse.id)}/photo-upload-url`,
+        {
+          filename: photoFile.name,
+          content_type: photoFile.type,
+          size: photoFile.size,
+        },
+      );
+
+      await uploadPhoto(uploadResponse.upload_url, photoFile);
+
+      await postJson(
+        `${API_CONFIG.baseUrl}/api/submissions/${encodeURIComponent(submissionResponse.id)}/finalize-photo`,
+        {
+          photo_key: uploadResponse.photo_key,
+          filename: photoFile.name,
+          content_type: photoFile.type,
+        },
+      );
+    }
+
+    showConfirmation(
+      "Submission Received",
+      payload.submission_type === "destination_request"
+        ? `Your route request from ${payload.origin_area || payload.location_text || "starting area not specified"} to ${payload.desired_destination || "destination not specified"} by ${formatModeList(payload.concern_mode)} has been submitted for review${photoFile ? " with one photo attached" : ""}.`
+        : `Your trouble-spot report for ${payload.location_text || "location not specified"} has been submitted for review${photoFile ? " with one photo attached" : ""}.`,
+      "success",
+    );
+
+    elements.form.reset();
+    renderFormMode();
+    elements.latitude.value = "";
+    elements.longitude.value = "";
+    clearCaptureMarker();
+    cancelCaptureMode();
+  } catch (error) {
+    console.error(error);
+    showConfirmation(
+      "Submission Not Sent",
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while sending the submission. Please try again shortly.",
+      "error",
+    );
+  } finally {
+    setSubmitting(false);
+  }
 }
 
-function buildGoogleFormUrl(payload) {
-  if (!FORM_CONFIG.enabled || !FORM_CONFIG.formBaseUrl) {
-    return "";
-  }
-
-  let url;
-  try {
-    url = new URL(FORM_CONFIG.formBaseUrl);
-  } catch (error) {
-    console.error("Invalid Google Form URL:", error);
-    return "";
-  }
-
-  FORM_CONFIG.prefillFields.forEach((fieldName) => {
-    const fieldId = FORM_CONFIG.googleFormFieldIds[fieldName];
-    if (!fieldId) {
-      return;
-    }
-
-    const values = getPrefillValues(fieldName, payload);
-    if (values.length === 0) {
-      return;
-    }
-
-    values.forEach((value) => {
-      url.searchParams.append(fieldId, value);
-    });
+async function postJson(url, payload) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
   });
 
-  return url.toString();
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "The submission service did not accept this request.");
+  }
+
+  return data;
 }
 
-function getPrefillValues(fieldName, payload) {
-  switch (fieldName) {
-    case "submission_type":
-      return [payload.submission_type === "destination_request" ? "Request a route or destination connection" : "Report a problem spot"];
-    case "category":
-      return [getSurveyCategory(payload).label];
-    case "location_text":
-      return payload.location_text ? [payload.location_text] : [];
-    case "coordinates": {
-      const coordinates = formatCoordinates(payload.latitude, payload.longitude);
-      return coordinates ? [coordinates] : [];
-    }
-    case "origin_area":
-      return payload.origin_area ? [payload.origin_area] : [];
-    case "desired_destination":
-      return payload.desired_destination ? [payload.desired_destination] : [];
-    case "description":
-      return payload.description ? [payload.description] : [];
-    case "concern_mode":
-      return Array.isArray(payload.concern_mode) ? payload.concern_mode.map(formatModeForForm) : [];
-    case "concern_mode_summary":
-      return payload.concern_mode?.length ? [formatModeList(payload.concern_mode)] : [];
-    case "additional_notes":
-      return payload.additional_notes ? [payload.additional_notes] : [];
-    default:
-      return [];
+async function uploadPhoto(uploadUrl, file) {
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    throw new Error("The photo could not be uploaded. Please try again without the photo or try again shortly.");
   }
 }
 
-function formatCoordinates(latitude, longitude) {
-  if (!latitude || !longitude) {
+function validatePhotoFile(file) {
+  if (!file) {
     return "";
   }
 
-  return `${latitude}, ${longitude}`;
+  if (!ACCEPTED_PHOTO_TYPES.has(file.type)) {
+    return "Please upload a JPG, PNG, or WebP image.";
+  }
+
+  if (file.size > MAX_PHOTO_SIZE_BYTES) {
+    return "Please upload an image smaller than 10 MB.";
+  }
+
+  return "";
+}
+
+function showConfirmation(title, message, state = "success") {
+  elements.confirmation.hidden = false;
+  elements.confirmation.dataset.state = state;
+  elements.confirmationTitle.textContent = title;
+  elements.confirmationText.textContent = message;
+}
+
+function setSubmitting(isSubmitting) {
+  elements.submitButton.disabled = isSubmitting;
+  elements.submitButton.textContent = isSubmitting ? "Submitting..." : "Submit for Review";
 }
 
 function buildSurveyPopup(record) {
@@ -619,17 +637,6 @@ function getSelectedModes() {
   return elements.concernModeInputs
     .filter((input) => !input.disabled && input.checked)
     .map((input) => input.value);
-}
-
-function formatModeForForm(value) {
-  const labels = {
-    walking: "Walking",
-    rolling: "Rolling",
-    cycling: "Cycling",
-    safety: "Safety emphasis",
-  };
-
-  return labels[value] || formatCategoryLabel(value);
 }
 
 function buildRouteRequestTitle(originArea, destination, modes) {

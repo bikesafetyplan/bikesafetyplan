@@ -1,0 +1,18 @@
+name = "morris-township-survey-intake"
+main = "src/index.mjs"
+compatibility_date = "2026-03-10"
+
+[vars]
+ALLOWED_ORIGINS = "https://matthewreate.github.io,http://localhost:8000"
+R2_ACCOUNT_ID = "REPLACE_ME"
+R2_BUCKET_NAME = "REPLACE_ME"
+R2_ACCESS_KEY_ID = "REPLACE_ME"
+
+[[d1_databases]]
+binding = "SUBMISSIONS_DB"
+database_name = "morris-township-survey"
+database_id = "REPLACE_ME"
+
+[[r2_buckets]]
+binding = "SUBMISSION_PHOTOS"
+bucket_name = "REPLACE_ME"

@@ -676,6 +676,12 @@ h2 {
   outline: none;
 }
 
+.future-button-live:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  filter: none;
+}
+
 .text-button {
   appearance: none;
   border: none;
@@ -950,6 +956,16 @@ h2 {
   background: rgba(39, 86, 107, 0.08);
 }
 
+.survey-confirmation[data-state="warning"] {
+  border-color: rgba(124, 93, 50, 0.18);
+  background: rgba(124, 93, 50, 0.08);
+}
+
+.survey-confirmation[data-state="error"] {
+  border-color: rgba(158, 58, 53, 0.18);
+  background: rgba(158, 58, 53, 0.08);
+}
+
 .survey-confirmation[hidden] {
   display: none;
 }
@@ -1130,6 +1146,14 @@ h2 {
 :root[data-theme="dark"] .hotspot-card.is-active,
 :root[data-theme="dark"] .survey-confirmation {
   background: rgba(47, 79, 96, 0.28);
+}
+
+:root[data-theme="dark"] .survey-confirmation[data-state="warning"] {
+  background: rgba(124, 93, 50, 0.18);
+}
+
+:root[data-theme="dark"] .survey-confirmation[data-state="error"] {
+  background: rgba(158, 58, 53, 0.18);
 }
 
 :root[data-theme="dark"] .future-button-live {

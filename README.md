@@ -1,6 +1,6 @@
 # Morris Township Planning Map
 
-Static Leaflet prototype for reviewing Morris Township walkability and bikeability issues with a small working group. The site is designed to run as a lightweight GitHub Pages project with no build step and no backend.
+Static Leaflet prototype for reviewing Morris Township walkability and bikeability issues with a small working group. The public site runs as a lightweight GitHub Pages project with no build step, and it can now be paired with a minimal Cloudflare Worker for live survey intake.
 
 The project now has two clearly distinct public-facing surfaces:
 - `index.html` is the official planning reference used for working-group review and orientation.
@@ -12,7 +12,10 @@ The project now has two clearly distinct public-facing surfaces:
 - `survey.html` provides the guided Survey Mode intake page for the April survey phase.
 - `styles.css` contains the responsive layout and the civic/editorial visual styling.
 - `script.js` loads the local GeoJSON files, initializes the Leaflet map, and manages filters, layer toggles, the visible-hotspots list, popups, and the detail panel.
-- `survey.js` manages the Survey Mode map, form switching, map-click capture, and prototype confirmation flow.
+- `survey.js` manages the Survey Mode map, form switching, map-click capture, and live submission handoff to the Cloudflare intake API.
+- `cloudflare/src/index.mjs` is the minimal Worker that creates submission records, issues photo-upload authorization, and finalizes uploaded photo metadata.
+- `cloudflare/schema.sql` defines the D1 schema for the live intake database.
+- `cloudflare/wrangler.toml` contains the Worker bindings and placeholder environment configuration.
 - `vendor/leaflet/` stores a local copy of Leaflet JS/CSS and image assets so the live map does not depend on a third-party CDN for bootstrap.
 - `data/hotspots.geojson` stores the TAC hotspot points normalized into the project taxonomy.
 - `data/destinations.geojson` stores curated reference destinations used to interpret hotspot demand and travel patterns.
@@ -58,83 +61,125 @@ The shipped prototype reads only local GeoJSON files at runtime. To replace the 
 
 The destination layer is intentionally small and curated. It should function as a civic reference set, not an exhaustive amenity inventory.
 
-## Live Submission Path: Google Forms
+## Live Submission Path: Cloudflare Worker + D1 + R2
 
-The site now treats Google Forms as the first live submission backend. The public website remains the map and survey interface, while the final submission step opens a Google Form in a new tab for actual intake, optional photo upload, and later review by the planning group.
+The public website remains the map and survey interface. When live intake is enabled, Survey Mode submits structured records to a small Cloudflare Worker:
+- the Worker stores structured submission data in D1
+- optional photos are uploaded to R2
+- the planning group later reviews submissions before anything enters the official planning record
 
-This setup keeps the public flow lightweight:
-- the website captures map context, trip intent, and structured descriptions
-- Google Forms stores the submission
-- Google Drive stores uploaded photos from the form's file-upload question
-- the planning group reviews submissions before anything enters the official planning record
-
-Current limitations of this approach:
-- file upload requires the respondent to sign in with a Google account
-- photo upload happens only in Google Forms, not on the website
-- Google Form submissions do not automatically appear back on the public map
+This keeps the public site simple while still allowing real uploads from a phone or computer. The only server-side component is the Worker.
 
 The map is meant to be read in a clear hierarchy: official planning data forms the current working base, survey responses remain separate and under review, and context layers support orientation rather than equal evidentiary weight.
 
-## Recommended Google Form Structure
+## Cloudflare Setup
 
-Use one Google Form with branching based on the first question:
+The minimal live stack is:
+- `GitHub Pages` for the public site
+- `Cloudflare Worker` for intake APIs
+- `D1` for structured submission records
+- `R2` for optional uploaded photos
 
-1. `Submission type`
-   - `Report a problem spot`
-   - `Request a route or destination connection`
-2. Branch to one of two sections.
+### 1. Create the Cloudflare resources
 
-Problem-spot section:
-- `Issue category`
-- `How is this experienced?`
-- `Location description`
-- `Nearby intersection or address`
-- `Map coordinates (optional)`
-- `Describe the problem`
-- `Photo upload (optional)`
-- `Contact information (optional)`
+Create:
+- one D1 database
+- one private R2 bucket
+- one Worker using the files in `cloudflare/`
 
-Route-request section:
-- `Destination type`
-- `How are you trying to make this trip?`
-- `From what area are you starting?`
-- `Where do you want to go?`
-- `Location or nearby intersection`
-- `Map coordinates (optional)`
-- `What gets in the way?`
-- `Photo upload (optional)`
-- `Contact information (optional)`
+Apply the schema:
 
-## Wiring Survey Mode to Google Forms
+```bash
+cd /Users/matthewreate/Desktop/Township\ Map/cloudflare
+wrangler d1 execute morris-township-survey --file=schema.sql
+```
 
-`survey.js` includes a `FORM_CONFIG` object near the top of the file. That object is the single place to connect the live Google Form.
+### 2. Configure the Worker
 
-To wire it:
-1. Create the Google Form and its branched sections.
-2. In Google Forms, choose `Get pre-filled link`.
-3. Enter sample answers, generate the link, and inspect the resulting query string.
-4. Copy each `entry.<id>` value into the matching field inside `FORM_CONFIG.googleFormFieldIds`.
-5. Paste the responder URL into `FORM_CONFIG.formBaseUrl`.
-6. Set `FORM_CONFIG.enabled` to `true`.
+Update `cloudflare/wrangler.toml`:
+- `database_id`
+- `bucket_name`
+- `R2_ACCOUNT_ID`
+- `R2_BUCKET_NAME`
+- `R2_ACCESS_KEY_ID`
+- `ALLOWED_ORIGINS`
 
-Suggested field mapping from the site:
+Set the R2 secret access key:
+
+```bash
+wrangler secret put R2_SECRET_ACCESS_KEY
+```
+
+The Worker expects these bindings:
+- `SUBMISSIONS_DB`
+- `SUBMISSION_PHOTOS`
+
+### 3. Configure R2 CORS
+
+Because the browser uploads directly to R2 using a short-lived signed URL, set bucket CORS to allow:
+- origin: your GitHub Pages domain and local preview origin
+- methods: `PUT`, `HEAD`
+- headers: `Content-Type`
+
+Keep the bucket private. Do not enable public listing.
+
+### 4. Connect Survey Mode to the Worker
+
+`survey.js` includes an `API_CONFIG` object near the top of the file.
+
+To enable live intake:
+1. Deploy the Worker.
+2. Copy its public base URL into `API_CONFIG.baseUrl`.
+3. Set `API_CONFIG.enabled` to `true`.
+
+The client will then:
+1. `POST /api/submissions`
+2. if a photo exists, request `POST /api/submissions/:id/photo-upload-url`
+3. upload the image directly to R2 with the signed URL
+4. call `POST /api/submissions/:id/finalize-photo`
+
+## Worker API
+
+### `POST /api/submissions`
+Creates a new `under_review` submission in D1.
+
+Request body:
 - `submission_type`
 - `category`
 - `location_text`
-- `coordinates`
 - `origin_area`
 - `desired_destination`
+- `latitude`
+- `longitude`
 - `description`
 - `concern_mode`
-- `concern_mode_summary`
 - `additional_notes`
+- `photo_present`
 
-Notes:
-- `concern_mode` can be mapped to a checkbox-style Google Form field if the pre-filled link supports repeated values cleanly.
-- `concern_mode_summary` exists as a safer fallback for a single text field if checkbox prefill is too brittle.
-- `Photo upload` and `Contact information` should stay inside Google Forms as manual entry.
+Response:
+- `id`
+- `review_status`
+- `photo_upload_required`
 
-This setup can later be replaced by a custom backend without changing the public-facing survey structure on the site.
+### `POST /api/submissions/:id/photo-upload-url`
+Returns a short-lived signed R2 upload URL for one optional image.
+
+Request body:
+- `filename`
+- `content_type`
+
+Response:
+- `upload_url`
+- `photo_key`
+- `max_photo_size_bytes`
+
+### `POST /api/submissions/:id/finalize-photo`
+Confirms that the uploaded object exists and stores the photo metadata on the submission record.
+
+Request body:
+- `photo_key`
+- `filename`
+- `content_type`
 
 ## Survey Mode
 
@@ -144,7 +189,8 @@ Survey Mode:
 - collects two structured types of resident input: problem spots and route / destination requests
 - supports map-assisted point capture or typed location text
 - frames all responses as `under_review`
-- opens the live Google Form for final submission when `FORM_CONFIG` is wired in `survey.js`
+- accepts one optional photo upload
+- submits directly to the Cloudflare intake API when `API_CONFIG` is wired in `survey.js`
 - uses `data/survey-sample-submissions.json` as a sample under-review layer rather than live public storage
 
 The planning viewer and Survey Mode are intentionally labeled as different phases of the same process:
@@ -156,4 +202,4 @@ The planning viewer and Survey Mode are intentionally labeled as different phase
 1. Review the imported hotspot points and confirm the category mapping from the TAC source map.
 2. Keep the destination layer limited to stable schools, parks, trailheads, museums, and civic sites that help explain walking and biking demand.
 3. Decide whether the full context linework is useful as-is or should be thinned into a smaller set of overlays for easier public reading.
-4. When the working group is ready for live intake, connect `survey.js` to the Google Form responder URL and pre-filled field IDs before exposing the form publicly.
+4. When the working group is ready for live intake, deploy the Cloudflare Worker, wire `API_CONFIG` in `survey.js`, and verify D1/R2 review flow before exposing submissions publicly.

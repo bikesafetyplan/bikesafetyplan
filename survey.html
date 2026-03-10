@@ -40,8 +40,8 @@
             walking, rolling, or cycling.
           </p>
           <p class="masthead-note survey-intro-note">
-            This page helps residents prepare a structured submission before handing off
-            to the live Google Form. Survey responses remain under review and do not
+            This page collects structured submissions directly on the site, including
+            optional photo evidence. Survey responses remain under review and do not
             appear as official planning records until the working group has reviewed them.
           </p>
         </div>
@@ -52,7 +52,7 @@
           <p class="process-eyebrow">Survey Intake View</p>
           <h2 class="process-title" id="survey-process-title">Current use: April resident input.</h2>
           <p class="process-note">
-            This page structures route requests and trouble-spot reports for review, then opens the live submission form. It does not replace the official planning map.
+            This page collects route requests and trouble-spot reports for review, with optional photo upload. It does not replace the official planning map.
           </p>
         </div>
         <div class="process-actions">
@@ -116,13 +116,13 @@
               <p class="eyebrow">Survey Intake</p>
               <h2>Share a Trouble Spot or Route Request</h2>
               <p class="panel-subtitle">
-                This page helps structure a report before the final submission step opens an external Google Form for live intake.
+                Submit a structured report here. Optional photo evidence can be attached and all entries remain under review.
               </p>
             </div>
           </div>
 
           <div class="survey-confirmation" id="survey-confirmation" hidden>
-            <h3 class="legend-group-title" id="survey-confirmation-title">Submission Handoff</h3>
+            <h3 class="legend-group-title" id="survey-confirmation-title">Submission Status</h3>
             <p class="survey-helper" id="survey-confirmation-text"></p>
           </div>
 
@@ -197,10 +197,18 @@
               <textarea name="additional_notes" rows="3" placeholder="Optional notes about walking, rolling, cycling, or safety concerns."></textarea>
             </label>
 
-            <div class="drawer-footer">
-              <button type="submit" class="future-button future-button-live">Continue to Submission Form</button>
+            <label class="field">
+              <span class="field-label">Photo (optional)</span>
+              <input id="photo-upload" type="file" name="photo" accept="image/jpeg,image/png,image/webp" />
               <p class="field-help">
-                The final submission step opens a Google Form in a new tab. Optional photo upload is available there, and Google sign-in is required for file upload.
+                A photo can help document a specific condition, but it is not required. One image only for now.
+              </p>
+            </label>
+
+            <div class="drawer-footer">
+              <button type="submit" class="future-button future-button-live" id="survey-submit-button">Submit for Review</button>
+              <p class="field-help">
+                This form submits directly into the planning review workflow. Uploaded photos remain under review with the submission.
               </p>
             </div>
           </form>
@@ -218,7 +226,7 @@
           The current planning map reflects official working-group data. Survey responses collected during this phase are under review and do not instantly become official records.
         </p>
         <p class="survey-helper">
-          This site remains the map and survey interface. Live submissions are completed in an external Google Form so the planning group can review responses and optional photo uploads before anything enters the planning record.
+          This site remains the public map and intake interface. Submissions and optional photos are collected for planning-group review before anything enters the official planning record.
         </p>
       </section>
     </div>
