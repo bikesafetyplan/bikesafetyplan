@@ -82,21 +82,6 @@ a {
   padding: 8px 6px 26px;
 }
 
-.process-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 22px;
-  align-items: start;
-  margin: 0 6px 24px;
-  padding: 18px 22px;
-  border-color: rgba(29, 42, 52, 0.1);
-}
-
-.process-copy {
-  display: grid;
-  gap: 8px;
-}
-
 .process-actions {
   display: grid;
   gap: 10px;
@@ -168,27 +153,62 @@ a {
   outline: none;
 }
 
-.future-input-band {
+.project-notes {
   display: grid;
-  grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
-  gap: 28px;
-  margin: 0 6px 24px;
-  border-color: rgba(29, 42, 52, 0.1);
-}
-
-.future-input-band h2 {
-  font-size: 1.28rem;
-  margin-bottom: 14px;
-}
-
-.future-input-band p {
-  margin: 0 0 10px;
-}
-
-.future-input-actions {
-  display: grid;
-  align-content: start;
   gap: 12px;
+  margin: 0 6px 24px;
+  padding: 16px 18px;
+  border-color: rgba(29, 42, 52, 0.08);
+}
+
+.project-notes-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.project-notes-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.project-notes-title {
+  font-size: 1.05rem;
+}
+
+.project-notes-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  align-self: start;
+}
+
+.project-notes-details {
+  border-top: 1px solid rgba(29, 42, 52, 0.08);
+  padding-top: 10px;
+}
+
+.project-notes-toggle {
+  cursor: pointer;
+  list-style: none;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.project-notes-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.project-notes-grid {
+  display: grid;
+  gap: 14px;
+  padding-top: 12px;
+}
+
+.project-notes-block {
+  display: grid;
+  gap: 6px;
 }
 
 .masthead {
@@ -252,44 +272,6 @@ h2 {
   max-width: 43rem;
   margin: 14px 0 0;
   font-size: 0.97rem;
-}
-
-.brief-card {
-  padding: 20px 22px;
-  border: 1px solid rgba(39, 86, 107, 0.16);
-  border-radius: 20px;
-  background: rgba(255, 252, 247, 0.7);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.brief-card h2 {
-  margin-bottom: 14px;
-  font-size: 1.02rem;
-}
-
-.brief-list {
-  margin: 0;
-  display: grid;
-  gap: 14px;
-}
-
-.brief-row {
-  display: grid;
-  gap: 4px;
-}
-
-.brief-row dt {
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.brief-row dd {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
 }
 
 .app-shell {
@@ -1073,9 +1055,8 @@ h2 {
 }
 
 @media (max-width: 1040px) {
-  .process-header,
-  .future-input-band,
   .masthead,
+  .project-notes-summary,
   .workspace,
   .survey-guidance-grid,
   .survey-workspace {
@@ -1090,10 +1071,7 @@ h2 {
     flex-direction: column;
   }
 
-  .future-input-actions {
-    justify-items: start;
-  }
-
+  .project-notes-actions,
   .process-actions {
     justify-items: start;
   }
@@ -1124,7 +1102,6 @@ h2 {
   }
 }
 
-:root[data-theme="dark"] .brief-card,
 :root[data-theme="dark"] .process-link,
 :root[data-theme="dark"] .theme-toggle,
 :root[data-theme="dark"] .control-item,
@@ -1143,10 +1120,6 @@ h2 {
 :root[data-theme="dark"] .panel,
 :root[data-theme="dark"] .map-card {
   border-color: rgba(226, 235, 240, 0.1);
-}
-
-:root[data-theme="dark"] .brief-card {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 :root[data-theme="dark"] .swatch {

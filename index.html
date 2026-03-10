@@ -47,62 +47,39 @@
               records, and one place to review what each location represents.
             </p>
           </div>
-          <section class="brief-card" aria-label="Project brief">
-            <h2>Project Brief</h2>
-            <dl class="brief-list">
-              <div class="brief-row">
-                <dt>Status</dt>
-                <dd>Working-group prototype for review and discussion.</dd>
-              </div>
-              <div class="brief-row">
-                <dt>Source Data</dt>
-                <dd>TAC hotspot points with contextual township overlays and a curated set of Morris Township reference destinations.</dd>
-              </div>
-              <div class="brief-row">
-                <dt>Audience</dt>
-                <dd>Morris Township staff, TAC members, and close planning collaborators.</dd>
-              </div>
-            </dl>
-          </section>
         </div>
       </header>
 
-      <section class="process-header panel" aria-labelledby="planning-process-title">
-        <div class="process-copy">
-          <p class="process-eyebrow">Official Planning View</p>
-          <h2 class="process-title" id="planning-process-title">Current use: working-group review and orientation.</h2>
-          <p class="process-note">
-            This page reflects official planning data and reference context. Survey responses are reviewed separately before they enter the planning record.
-          </p>
+      <section class="project-notes panel" aria-labelledby="project-notes-title">
+        <div class="project-notes-summary">
+          <div class="project-notes-copy">
+            <p class="process-eyebrow">Project Notes</p>
+            <h2 class="project-notes-title" id="project-notes-title">This page is the official planning view for working-group review.</h2>
+          </div>
+          <div class="project-notes-actions">
+            <a href="survey.html" class="process-link">Go to Survey Mode</a>
+            <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+              <span data-theme-label>Dark mode</span>
+            </button>
+          </div>
         </div>
-        <div class="process-actions">
-          <a href="survey.html" class="process-link">Go to Survey Mode</a>
-          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-            <span data-theme-label>Dark mode</span>
-          </button>
-        </div>
-      </section>
-
-      <section class="future-input-band panel" aria-labelledby="future-input-title">
-        <div class="future-input-copy">
-          <p class="eyebrow">Survey Intake</p>
-          <h2 id="future-input-title">April survey responses will be reviewed before entering the official planning record.</h2>
-          <p>
-            This planning view remains the official working-group reference.
-          </p>
-          <p>
-            Survey Mode is the intake step for resident route requests and trouble-spot reports during the April survey phase.
-          </p>
-          <p>
-            All survey responses remain under review until the planning group confirms how they should be used.
-          </p>
-        </div>
-        <div class="future-input-actions">
-          <a href="survey.html" class="future-button future-button-live">Go to Survey Mode</a>
-          <p class="subdued">
-            Survey Mode collects April intake in a separate, under-review workflow rather than changing this official planning view.
-          </p>
-        </div>
+        <details class="project-notes-details">
+          <summary class="project-notes-toggle">View project brief and survey status</summary>
+          <div class="project-notes-grid">
+            <section class="project-notes-block">
+              <h3 class="legend-group-title">Status</h3>
+              <p class="legend-copy">Working-group prototype for review and orientation.</p>
+            </section>
+            <section class="project-notes-block">
+              <h3 class="legend-group-title">Source Data</h3>
+              <p class="legend-copy">TAC hotspot points, contextual township overlays, and a curated set of Morris Township reference destinations.</p>
+            </section>
+            <section class="project-notes-block">
+              <h3 class="legend-group-title">Survey Intake</h3>
+              <p class="legend-copy">April survey responses are collected in Survey Mode and remain under review before entering the official planning record.</p>
+            </section>
+          </div>
+        </details>
       </section>
 
       <main class="app-shell">
