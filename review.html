@@ -34,27 +34,41 @@
           <p class="eyebrow">Working Group Review</p>
           <h1>Review Mode</h1>
           <p class="lede">
-            A working board for reading new survey submissions in place, checking repeat
-            reports, and reviewing attached photos before anything enters the official
-            planning record.
+            A working board for reading survey submissions in place, checking repeat reports, and reviewing attached photos before anything enters the official planning record.
           </p>
         </div>
       </header>
 
-      <section class="process-header panel" aria-labelledby="review-process-title">
-        <div class="process-copy">
-          <p class="process-eyebrow">Review Board</p>
-          <h2 class="process-title" id="review-process-title">Current use: working-group review and discussion.</h2>
-          <p class="process-note">
-            This page shows raw survey submissions under review. It is distinct from the official planning map and is shared directly with the working group.
-          </p>
+      <section class="notes-strip panel" aria-labelledby="review-notes-title">
+        <div class="notes-summary">
+          <div class="notes-copy">
+            <p class="process-eyebrow">Working Group Review</p>
+            <h2 class="project-notes-title" id="review-notes-title">This page shows raw survey submissions under review before they enter the planning record.</h2>
+          </div>
+          <div class="notes-actions">
+            <a href="index.html" class="process-link">Back to Planning Map</a>
+            <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+              <span data-theme-label>Dark mode</span>
+            </button>
+          </div>
         </div>
-        <div class="process-actions">
-          <a href="index.html" class="process-link">Back to Planning Map</a>
-          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
-            <span data-theme-label>Dark mode</span>
-          </button>
-        </div>
+        <details class="notes-details">
+          <summary class="notes-toggle">View review status and handling notes</summary>
+          <div class="notes-grid">
+            <section class="notes-block">
+              <h3 class="legend-group-title">Status</h3>
+              <p class="legend-copy">This page is for working-group review and discussion, not public interpretation of raw submissions.</p>
+            </section>
+            <section class="notes-block">
+              <h3 class="legend-group-title">What is Shown</h3>
+              <p class="legend-copy">Recent survey submissions appear here as individual records with repeat-report signals, location context, and photo evidence where available.</p>
+            </section>
+            <section class="notes-block">
+              <h3 class="legend-group-title">Planning Record</h3>
+              <p class="legend-copy">Records shown here remain under review until the working group decides what should be merged into the official planning view.</p>
+            </section>
+          </div>
+        </details>
       </section>
 
       <section class="panel review-snapshot" aria-labelledby="review-snapshot-title">

@@ -82,20 +82,27 @@ a {
   padding: 8px 6px 26px;
 }
 
-.process-header {
+.notes-strip {
+  display: grid;
+  gap: 12px;
+  margin: 0 6px 24px;
+  padding: 16px 18px;
+  border-color: rgba(29, 42, 52, 0.08);
+}
+
+.notes-summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px 24px;
+  gap: 18px;
   align-items: start;
-  margin: 0 6px 24px;
 }
 
-.process-copy {
+.notes-copy {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
-.process-actions {
+.notes-actions {
   display: grid;
   gap: 10px;
   justify-items: end;
@@ -109,17 +116,6 @@ a {
   text-transform: uppercase;
   color: var(--accent);
   font-weight: 700;
-}
-
-.process-title {
-  font-size: 1.08rem;
-}
-
-.process-note {
-  margin: 0;
-  max-width: 48rem;
-  color: var(--muted);
-  line-height: 1.55;
 }
 
 .process-link {
@@ -166,60 +162,33 @@ a {
   outline: none;
 }
 
-.project-notes {
-  display: grid;
-  gap: 12px;
-  margin: 0 6px 24px;
-  padding: 16px 18px;
-  border-color: rgba(29, 42, 52, 0.08);
-}
-
-.project-notes-summary {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: start;
-}
-
-.project-notes-copy {
-  display: grid;
-  gap: 6px;
-}
-
 .project-notes-title {
   font-size: 1.05rem;
 }
 
-.project-notes-actions {
-  display: grid;
-  gap: 10px;
-  justify-items: end;
-  align-self: start;
-}
-
-.project-notes-details {
+.notes-details {
   border-top: 1px solid rgba(29, 42, 52, 0.08);
   padding-top: 10px;
 }
 
-.project-notes-toggle {
+.notes-toggle {
   cursor: pointer;
   list-style: none;
   color: var(--muted);
   font-weight: 600;
 }
 
-.project-notes-toggle::-webkit-details-marker {
+.notes-toggle::-webkit-details-marker {
   display: none;
 }
 
-.project-notes-grid {
+.notes-grid {
   display: grid;
   gap: 14px;
   padding-top: 12px;
 }
 
-.project-notes-block {
+.notes-block {
   display: grid;
   gap: 6px;
 }
@@ -885,10 +854,6 @@ h2 {
   gap: 14px;
 }
 
-.survey-intro-note {
-  max-width: 44rem;
-}
-
 .survey-guidance {
   display: grid;
   gap: 18px;
@@ -1253,8 +1218,7 @@ h2 {
 
 @media (max-width: 1040px) {
   .masthead,
-  .process-header,
-  .project-notes-summary,
+  .notes-summary,
   .workspace,
   .survey-guidance-grid,
   .survey-workspace,
@@ -1270,8 +1234,7 @@ h2 {
     flex-direction: column;
   }
 
-  .project-notes-actions,
-  .process-actions {
+  .notes-actions {
     justify-items: start;
   }
 
