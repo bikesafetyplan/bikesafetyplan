@@ -276,6 +276,14 @@ h2 {
   align-items: stretch;
 }
 
+.inspection-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+  gap: 22px;
+  align-items: start;
+  margin-top: -2px;
+}
+
 .sidebar {
   min-width: 0;
 }
@@ -326,7 +334,7 @@ h2 {
 
 .panel-tools {
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
 
 .tool-group {
@@ -334,18 +342,11 @@ h2 {
   gap: 10px;
 }
 
-.tool-group-accordion {
-  gap: 0;
-}
-
 .tool-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  cursor: pointer;
-  list-style: none;
-  padding: 0;
 }
 
 .tool-group-header h3 {
@@ -354,32 +355,6 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-}
-
-.tool-group-header::-webkit-details-marker {
-  display: none;
-}
-
-.tool-group-header::after,
-.sidebar-section-toggle::after {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid var(--muted);
-  border-bottom: 2px solid var(--muted);
-  transform: rotate(45deg);
-  transition: transform 120ms ease;
-  margin-left: auto;
-  flex: 0 0 auto;
-}
-
-.tool-group-accordion[open] > .tool-group-header::after,
-.sidebar-section-toggle[aria-expanded="true"]::after {
-  transform: rotate(-135deg);
-}
-
-.tool-group-body {
-  padding-top: 10px;
 }
 
 .control-list {
@@ -461,33 +436,47 @@ h2 {
   white-space: nowrap;
 }
 
-.sidebar-section-toggle {
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  margin-bottom: 0;
-}
-
-.sidebar-section-title {
+.inspection-panel {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
+  flex-direction: column;
+  gap: 0;
+  max-height: 320px;
+  min-height: 0;
+  padding: 16px 18px;
 }
 
-.sidebar-section-body {
+.inspection-panel .panel-header {
+  margin-bottom: 10px;
+}
+
+.inspection-panel .panel-subtitle {
+  margin-top: 0;
+}
+
+.inspection-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
   padding-top: 14px;
+  padding-right: 4px;
+}
+
+.inspection-panel-body-list {
+  scrollbar-gutter: stable;
+}
+
+.inspection-panel-body-detail {
+  scrollbar-gutter: stable;
 }
 
 .reference-section {
   display: grid;
-  gap: 14px;
-  padding-top: 18px;
-  padding-bottom: 18px;
+  gap: 12px;
+  margin-top: -4px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  border-color: rgba(29, 42, 52, 0.06);
+  box-shadow: 0 12px 28px rgba(29, 42, 52, 0.08);
 }
 
 .reference-header {
@@ -601,6 +590,7 @@ h2 {
   gap: 10px;
   max-height: none;
   overflow: visible;
+  align-content: start;
 }
 
 .hotspot-card {
@@ -1331,6 +1321,7 @@ h2 {
   .masthead,
   .notes-summary,
   .workspace,
+  .inspection-strip,
   .survey-guidance-grid,
   .survey-workspace,
   .review-workspace {
@@ -1357,6 +1348,20 @@ h2 {
   .sidebar-scroll {
     max-height: none;
     height: auto;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .inspection-strip {
+    margin-top: 4px;
+  }
+
+  .inspection-panel {
+    max-height: none;
+    height: auto;
+  }
+
+  .inspection-panel-body {
     overflow: visible;
     padding-right: 0;
   }

@@ -120,10 +120,6 @@ const elements = {
   detailPanel: document.getElementById("detail-panel"),
   referenceContent: document.getElementById("reference-content"),
   mapStatus: document.getElementById("map-status"),
-  visibleHotspotsToggle: document.getElementById("visible-hotspots-toggle"),
-  visibleHotspotsSection: document.getElementById("visible-hotspots-section"),
-  mapRecordToggle: document.getElementById("map-record-toggle"),
-  mapRecordSection: document.getElementById("map-record-section"),
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -146,7 +142,6 @@ async function init() {
   renderCategoryFilters(hotspots.features);
   renderLayerToggles();
   renderReviewLayerToggles();
-  bindSidebarSections();
   renderMapReference();
   if (!ensureLeafletAvailable()) {
     elements.detailPanel.innerHTML =
@@ -520,23 +515,6 @@ function renderReviewLayerToggles() {
     } else {
       appState.map.removeLayer(appState.residentLayerGroup);
     }
-  });
-}
-
-function bindSidebarSections() {
-  bindSidebarSection(elements.visibleHotspotsToggle, elements.visibleHotspotsSection);
-  bindSidebarSection(elements.mapRecordToggle, elements.mapRecordSection);
-}
-
-function bindSidebarSection(toggle, section) {
-  if (!toggle || !section) {
-    return;
-  }
-
-  toggle.addEventListener("click", () => {
-    const isExpanded = toggle.getAttribute("aria-expanded") === "true";
-    toggle.setAttribute("aria-expanded", String(!isExpanded));
-    section.hidden = isExpanded;
   });
 }
 
