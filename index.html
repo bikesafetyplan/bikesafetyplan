@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="planning-page">
     <div class="page-shell">
       <header class="page-header">
         <p class="eyebrow">Working Group Prototype</p>
@@ -36,15 +36,8 @@
           <div class="masthead-copy">
             <h1>Morris Township Planning Map</h1>
             <p class="lede">
-              A working map for reviewing walkability and bikeability concerns
-              in Morris Township, with current hotspot records organized for
-              discussion of sidewalk gaps, crossings, and reference
-              destinations.
-            </p>
-            <p class="masthead-note">
-              This prototype presents TAC source material as a clearer civic
-              reference: one map for orientation, one working rail for filtering
-              records, and one place to review what each location represents.
+              A working map for reviewing hotspot records, destinations, and
+              current planning context in Morris Township.
             </p>
           </div>
         </div>
@@ -53,8 +46,10 @@
       <section class="notes-strip panel" aria-labelledby="project-notes-title">
         <div class="notes-summary">
           <div class="notes-copy">
-            <p class="process-eyebrow">Project Notes</p>
-            <h2 class="project-notes-title" id="project-notes-title">This page is the official planning view for working-group review.</h2>
+            <p class="process-eyebrow">Official Planning View</p>
+            <p class="notes-inline-copy" id="project-notes-title">
+              Working-group review of official planning data and current township context.
+            </p>
           </div>
           <div class="notes-actions">
             <a href="survey.html" class="process-link">Go to Survey Mode</a>
@@ -65,7 +60,7 @@
           </div>
         </div>
         <details class="notes-details">
-          <summary class="notes-toggle">View project brief and survey status</summary>
+          <summary class="notes-toggle">Project brief and survey status</summary>
           <div class="notes-grid">
             <section class="notes-block">
               <h3 class="legend-group-title">Status</h3>
