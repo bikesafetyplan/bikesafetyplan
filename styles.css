@@ -626,6 +626,7 @@ h2 {
 
 .detail-panel {
   min-height: 180px;
+  min-width: 0;
 }
 
 .detail-title-row {
@@ -643,6 +644,7 @@ h2 {
 
 .detail-body {
   margin: 0 0 14px;
+  overflow-wrap: anywhere;
 }
 
 .detail-meta {
@@ -652,7 +654,7 @@ h2 {
 
 .detail-meta-row {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 110px minmax(0, 1fr);
   gap: 10px;
   font-size: 0.94rem;
 }
@@ -1025,7 +1027,7 @@ h2 {
 .review-metric {
   display: grid;
   gap: 6px;
-  padding: 12px 14px;
+  padding: 11px 13px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid rgba(29, 42, 52, 0.07);
@@ -1105,6 +1107,7 @@ h2 {
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding-right: 4px;
   align-content: start;
 }

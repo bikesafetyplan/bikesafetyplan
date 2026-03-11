@@ -167,6 +167,14 @@ function initializeMap() {
   map.on("click", handleMapClick);
   surveyState.map = map;
   hideMapFailure();
+
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
+
+  window.setTimeout(() => {
+    map.invalidateSize();
+  }, 180);
 }
 
 function buildOfficialHotspots(features) {

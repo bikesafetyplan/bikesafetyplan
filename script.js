@@ -220,6 +220,14 @@ function initializeMap() {
 
   appState.map = map;
   hideMapFailure();
+
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
+
+  window.setTimeout(() => {
+    map.invalidateSize();
+  }, 180);
 }
 
 function buildHotspots(features) {
