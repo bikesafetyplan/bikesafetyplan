@@ -13,6 +13,15 @@ const SUBMISSION_TYPES = new Set(["hotspot", "destination_request"]);
 const HOTSPOT_MODES = new Set(["walking", "rolling", "cycling", "safety"]);
 const DESTINATION_MODES = new Set(["walking", "rolling", "cycling"]);
 
+// Expected Worker environment:
+// - binding: SUBMISSIONS_DB (D1)
+// - binding: SUBMISSION_PHOTOS (R2)
+// - var: ALLOWED_ORIGINS
+// - var: R2_ACCOUNT_ID
+// - var: R2_BUCKET_NAME
+// - secret: R2_ACCESS_KEY_ID
+// - secret: R2_SECRET_ACCESS_KEY
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);

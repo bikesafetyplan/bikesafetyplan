@@ -12,6 +12,13 @@
 	},
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "morris_township_submissions",
+			"database_name": "morris-township-submissions",
+			"database_id": "8c5cc48f-5467-4cdc-b47a-15d091ae340f"
+		}
 	]
 	/**
 	 * Smart Placement

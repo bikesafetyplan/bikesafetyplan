@@ -4,15 +4,14 @@ compatibility_date = "2026-03-10"
 
 [vars]
 ALLOWED_ORIGINS = "https://matthewreate.github.io,http://localhost:8000"
-R2_ACCOUNT_ID = "REPLACE_ME"
-R2_BUCKET_NAME = "REPLACE_ME"
-R2_ACCESS_KEY_ID = "REPLACE_ME"
+R2_ACCOUNT_ID = "d17ca0bc458a3f3d320952a7b03d2fe7"
+R2_BUCKET_NAME = "morris-township-photos"
 
 [[d1_databases]]
 binding = "SUBMISSIONS_DB"
-database_name = "morris-township-survey"
-database_id = "REPLACE_ME"
+database_name = "morris-township-submissions"
+database_id = "8c5cc48f-5467-4cdc-b47a-15d091ae340f"
 
 [[r2_buckets]]
 binding = "SUBMISSION_PHOTOS"
-bucket_name = "REPLACE_ME"
+bucket_name = "morris-township-photos"

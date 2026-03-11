@@ -29,8 +29,8 @@ const DESTINATION_MODES = [
 ];
 
 const API_CONFIG = {
-  enabled: false,
-  baseUrl: "",
+  enabled: true,
+  baseUrl: "https://morris-township-survey-intake.matthewreate.workers.dev",
 };
 
 const MAX_PHOTO_SIZE_BYTES = 10 * 1024 * 1024;
@@ -437,14 +437,14 @@ async function handleSubmit(event) {
 
   try {
     setSubmitting(true);
-    const submissionResponse = await postJson(`${API_CONFIG.baseUrl}/api/submissions`, {
+    const submissionResponse = await postJson(getApiUrl("/api/submissions"), {
       ...payload,
       photo_present: Boolean(photoFile),
     });
 
     if (photoFile) {
       const uploadResponse = await postJson(
-        `${API_CONFIG.baseUrl}/api/submissions/${encodeURIComponent(submissionResponse.id)}/photo-upload-url`,
+        getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/photo-upload-url`),
         {
           filename: photoFile.name,
           content_type: photoFile.type,
@@ -455,7 +455,7 @@ async function handleSubmit(event) {
       await uploadPhoto(uploadResponse.upload_url, photoFile);
 
       await postJson(
-        `${API_CONFIG.baseUrl}/api/submissions/${encodeURIComponent(submissionResponse.id)}/finalize-photo`,
+        getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/finalize-photo`),
         {
           photo_key: uploadResponse.photo_key,
           filename: photoFile.name,
@@ -549,6 +549,10 @@ function showConfirmation(title, message, state = "success") {
 function setSubmitting(isSubmitting) {
   elements.submitButton.disabled = isSubmitting;
   elements.submitButton.textContent = isSubmitting ? "Submitting..." : "Submit for Review";
+}
+
+function getApiUrl(path) {
+  return `${API_CONFIG.baseUrl.replace(/\/+$/, "")}${path}`;
 }
 
 function buildSurveyPopup(record) {
