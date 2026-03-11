@@ -123,6 +123,18 @@ Because the browser uploads directly to R2 using a short-lived signed URL, set b
 
 Keep the bucket private. Do not enable public listing.
 
+If this is missing, the survey form will usually fail during the photo-upload step with a browser-level network error such as `Load failed`, even though the Worker itself is working.
+
+Recommended R2 CORS values for this project:
+- origins:
+  - `https://matthewreate.github.io`
+  - `http://localhost:8000`
+- methods:
+  - `PUT`
+  - `HEAD`
+- allowed headers:
+  - `Content-Type`
+
 ### 4. Connect Survey Mode to the Worker
 
 `survey.js` includes an `API_CONFIG` object near the top of the file.

@@ -437,31 +437,49 @@ async function handleSubmit(event) {
 
   try {
     setSubmitting(true);
-    const submissionResponse = await postJson(getApiUrl("/api/submissions"), {
-      ...payload,
-      photo_present: Boolean(photoFile),
-    });
+    let submissionResponse;
+    try {
+      submissionResponse = await postJson(getApiUrl("/api/submissions"), {
+        ...payload,
+        photo_present: Boolean(photoFile),
+      });
+    } catch (error) {
+      throw new Error(getSubmissionStageError(error));
+    }
 
     if (photoFile) {
-      const uploadResponse = await postJson(
-        getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/photo-upload-url`),
-        {
-          filename: photoFile.name,
-          content_type: photoFile.type,
-          size: photoFile.size,
-        },
-      );
+      let uploadResponse;
+      try {
+        uploadResponse = await postJson(
+          getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/photo-upload-url`),
+          {
+            filename: photoFile.name,
+            content_type: photoFile.type,
+            size: photoFile.size,
+          },
+        );
+      } catch (error) {
+        throw new Error(getUploadAuthorizationError(error));
+      }
 
-      await uploadPhoto(uploadResponse.upload_url, photoFile);
+      try {
+        await uploadPhoto(uploadResponse.upload_url, photoFile);
+      } catch (error) {
+        throw new Error(getPhotoUploadError(error));
+      }
 
-      await postJson(
-        getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/finalize-photo`),
-        {
-          photo_key: uploadResponse.photo_key,
-          filename: photoFile.name,
-          content_type: photoFile.type,
-        },
-      );
+      try {
+        await postJson(
+          getApiUrl(`/api/submissions/${encodeURIComponent(submissionResponse.id)}/finalize-photo`),
+          {
+            photo_key: uploadResponse.photo_key,
+            filename: photoFile.name,
+            content_type: photoFile.type,
+          },
+        );
+      } catch (error) {
+        throw new Error(getFinalizeUploadError(error));
+      }
     }
 
     showConfirmation(
@@ -510,22 +528,42 @@ async function postJson(url, payload) {
 }
 
 async function uploadPhoto(uploadUrl, file) {
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
+  let response;
+  try {
+    response = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type,
+      },
+      body: file,
+    });
+  } catch (error) {
+    throw new Error(
+      "The browser could not upload the photo to storage. This is usually a bucket CORS or origin setting issue in Cloudflare R2.",
+      { cause: error },
+    );
+  }
 
   if (!response.ok) {
-    throw new Error("The photo could not be uploaded. Please try again without the photo or try again shortly.");
+    if (response.status === 403) {
+      throw new Error(
+        "Photo upload was blocked by Cloudflare R2. Check the bucket CORS settings for the site origin before testing again.",
+      );
+    }
+
+    throw new Error("The photo could not be uploaded to storage. Please try again without the photo or try again shortly.");
   }
 }
 
 function validatePhotoFile(file) {
   if (!file) {
     return "";
+  }
+
+  const extension = getFileExtension(file.name);
+
+  if (extension === "heic" || extension === "heif") {
+    return "HEIC photos are not supported yet. Please export or save the image as JPG, PNG, or WebP before uploading.";
   }
 
   if (!ACCEPTED_PHOTO_TYPES.has(file.type)) {
@@ -549,6 +587,38 @@ function showConfirmation(title, message, state = "success") {
 function setSubmitting(isSubmitting) {
   elements.submitButton.disabled = isSubmitting;
   elements.submitButton.textContent = isSubmitting ? "Submitting..." : "Submit for Review";
+}
+
+function getSubmissionStageError(error) {
+  return `${getErrorMessage(error, "The submission record could not be created.")} This usually means the Worker or D1 intake step failed.`;
+}
+
+function getUploadAuthorizationError(error) {
+  return `${getErrorMessage(error, "The upload authorization step failed.")} The Worker could not prepare the photo upload to R2.`;
+}
+
+function getPhotoUploadError(error) {
+  return getErrorMessage(
+    error,
+    "The photo could not be uploaded to storage. Check the R2 bucket CORS settings and try again.",
+  );
+}
+
+function getFinalizeUploadError(error) {
+  return `${getErrorMessage(error, "The uploaded photo could not be finalized.")} The file may have uploaded, but the review record was not updated.`;
+}
+
+function getErrorMessage(error, fallback) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
+function getFileExtension(filename) {
+  const parts = String(filename || "").toLowerCase().split(".");
+  return parts.length > 1 ? parts.at(-1) : "";
 }
 
 function getApiUrl(path) {
