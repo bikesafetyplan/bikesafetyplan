@@ -1551,3 +1551,156 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+/* =====================================================
+   SURVEY PAGE REDESIGN
+   Form-first layout: compact header → embedded form → map section
+   ===================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.survey-shell {
+  max-width: 860px;
+}
+
+/* --- Compact header --- */
+
+.survey-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0 24px;
+}
+
+.survey-header h1 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  line-height: 1;
+}
+
+.survey-header-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.survey-tagline {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  max-width: 38rem;
+}
+
+.survey-header .theme-toggle {
+  flex: 0 0 auto;
+  margin-top: 6px;
+}
+
+/* --- Google Form embed (primary action) --- */
+
+.survey-form-embed {
+  background: var(--panel);
+  border: 1px solid rgba(29, 42, 52, 0.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  padding: 4px;
+  overflow: hidden;
+}
+
+.survey-form-embed iframe {
+  display: block;
+  width: 100%;
+  border-radius: 18px;
+}
+
+/* --- Map section (secondary) --- */
+
+.survey-map-section {
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+}
+
+.map-section-intro {
+  margin-bottom: 24px;
+}
+
+.map-section-intro h2 {
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+.map-section-intro .panel-subtitle {
+  margin: 0;
+  max-width: 44rem;
+}
+
+/* Override survey-workspace for the map section within the narrower shell */
+.survey-shell .survey-workspace {
+  max-width: 100%;
+}
+
+/* Full width workspace when inside the narrower survey shell */
+@media (min-width: 1041px) {
+  .survey-shell .survey-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  }
+}
+
+/* --- Footer --- */
+
+.survey-footer {
+  margin-top: 40px;
+  padding: 20px 0 8px;
+  border-top: 1px solid var(--line);
+}
+
+.survey-footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 44rem;
+}
+
+/* --- Mobile adjustments for survey redesign --- */
+
+@media (max-width: 600px) {
+  .survey-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .survey-header .theme-toggle {
+    margin-top: 0;
+    align-self: flex-start;
+  }
+
+  .survey-form-embed {
+    border-radius: 16px;
+    padding: 2px;
+  }
+
+  .survey-map-section {
+    margin-top: 32px;
+    padding-top: 28px;
+  }
+}
+
+:root[data-theme="dark"] .survey-form-embed {
+  border-color: rgba(226, 235, 240, 0.1);
+}
