@@ -1554,16 +1554,16 @@ h2 {
 
 /* =====================================================
    SURVEY PAGE — Gateway layout
-   Header → CTA card → divider → map section → footer
+   Narrow shell (header + CTA) → full-width map → narrow footer
    ===================================================== */
 
-/* --- Page shell width --- */
+/* --- Narrow shell --- */
 
 .survey-shell {
   max-width: 900px;
 }
 
-/* --- Compact header --- */
+/* --- Header --- */
 
 .survey-header {
   display: flex;
@@ -1638,31 +1638,117 @@ h2 {
   white-space: nowrap;
 }
 
-.survey-cta-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #27566b, #3d7289);
-  color: #f9f3ec;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  transition: filter 120ms ease, transform 120ms ease;
+/* =====================================================
+   CTA BUTTON — Animated, coral, with shimmer sweep
+   ===================================================== */
+
+/* Entrance: slides up with a slight spring overshoot */
+@keyframes survey-btn-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.survey-cta-button:hover,
-.survey-cta-button:focus-visible {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-  outline: none;
+/* Shimmer: diagonal highlight sweeps across in first 15% of cycle,
+   then nothing for the remaining 85% — effect fires every ~5s */
+@keyframes survey-btn-shimmer {
+  0%   { transform: skewX(-20deg) translateX(-140%); }
+  15%  { transform: skewX(-20deg) translateX(260%); }
+  100% { transform: skewX(-20deg) translateX(260%); }
+}
+
+.survey-cta-button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4603a 0%, #bf4f2d 100%);
+  color: #fff8f4;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.025em;
+  text-decoration: none;
+  /* Ambient glow — static, always visible */
+  box-shadow:
+    0 6px 28px rgba(191, 79, 45, 0.38),
+    0 2px 8px  rgba(191, 79, 45, 0.22);
+  /* Entrance fires once on load after 300ms delay */
+  animation: survey-btn-enter 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+  transition:
+    transform       160ms ease,
+    box-shadow      160ms ease,
+    filter          160ms ease;
+  will-change: transform;
+}
+
+/* Shimmer pseudo-element */
+.survey-cta-button::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0)    0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0)    100%
+  );
+  animation: survey-btn-shimmer 5s ease-in-out 1.2s infinite;
+  pointer-events: none;
 }
 
 .survey-cta-button svg {
   flex: 0 0 auto;
-  opacity: 0.8;
+  opacity: 0.85;
+  transition: transform 160ms ease;
+}
+
+/* Hover: lift, stronger glow, arrow nudges right */
+.survey-cta-button:hover,
+.survey-cta-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 36px rgba(191, 79, 45, 0.50),
+    0 4px  12px rgba(191, 79, 45, 0.28);
+  filter: brightness(1.05);
+  outline: none;
+}
+
+.survey-cta-button:hover svg,
+.survey-cta-button:focus-visible svg {
+  transform: translate(2px, -2px);
+}
+
+/* Pause shimmer on hover so it doesn't feel frantic */
+.survey-cta-button:hover::after,
+.survey-cta-button:focus-visible::after {
+  animation-play-state: paused;
+}
+
+/* Active/press: sink slightly */
+.survey-cta-button:active {
+  transform: translateY(0px);
+  filter: brightness(0.97);
+}
+
+/* Accessibility: no animation for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .survey-cta-button {
+    animation: none;
+  }
+  .survey-cta-button::after {
+    display: none;
+  }
 }
 
 /* --- Section divider --- */
@@ -1671,7 +1757,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 44px 0 36px;
+  margin: 44px 0 0;
 }
 
 .survey-section-divider::before,
@@ -1683,7 +1769,7 @@ h2 {
 }
 
 .survey-section-label {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1691,7 +1777,20 @@ h2 {
   white-space: nowrap;
 }
 
-/* --- Map intro --- */
+/* =====================================================
+   MAP BREAKOUT — full viewport width, own centering
+   ===================================================== */
+
+.survey-map-breakout {
+  width: 100%;
+  padding: 36px 0 48px;
+  border-top: none;
+}
+
+.survey-map-inner {
+  width: min(1440px, calc(100% - 48px));
+  margin: 0 auto;
+}
 
 .map-section-intro {
   margin-bottom: 22px;
@@ -1713,8 +1812,7 @@ h2 {
 /* --- Footer --- */
 
 .survey-footer {
-  margin-top: 44px;
-  padding: 20px 0 12px;
+  padding: 20px 0 24px;
   border-top: 1px solid var(--line);
 }
 
@@ -1725,7 +1823,9 @@ h2 {
   line-height: 1.55;
 }
 
-/* --- Mobile --- */
+/* =====================================================
+   MOBILE
+   ===================================================== */
 
 @media (max-width: 600px) {
   .survey-header {
@@ -1744,16 +1844,37 @@ h2 {
   }
 
   .survey-section-divider {
-    margin: 32px 0 28px;
+    margin: 28px 0 0;
   }
 
   .survey-section-label {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
+  }
+
+  .survey-map-breakout {
+    padding: 28px 0 36px;
+  }
+
+  .survey-map-inner {
+    width: min(100%, calc(100% - 24px));
   }
 }
 
-/* --- Dark mode --- */
+/* =====================================================
+   DARK MODE
+   ===================================================== */
 
 :root[data-theme="dark"] .survey-cta-button {
-  color: #f3f7f6;
+  background: linear-gradient(135deg, #c85a35 0%, #ad4828 100%);
+  color: #fff5f0;
+  box-shadow:
+    0 6px 28px rgba(200, 90, 53, 0.42),
+    0 2px 8px  rgba(200, 90, 53, 0.24);
+}
+
+:root[data-theme="dark"] .survey-cta-button:hover,
+:root[data-theme="dark"] .survey-cta-button:focus-visible {
+  box-shadow:
+    0 12px 36px rgba(200, 90, 53, 0.56),
+    0 4px  12px rgba(200, 90, 53, 0.30);
 }

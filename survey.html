@@ -29,9 +29,10 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="survey-page">
+
+    <!-- NARROW SHELL: header + CTA -->
     <div class="page-shell survey-shell">
 
-      <!-- HEADER -->
       <header class="survey-header">
         <div class="survey-header-text">
           <p class="eyebrow">Transportation Advisory Committee</p>
@@ -42,7 +43,6 @@
         </button>
       </header>
 
-      <!-- PRIMARY CTA -->
       <section class="survey-cta-block panel" aria-labelledby="survey-cta-title">
         <div class="survey-cta-body">
           <h2 id="survey-cta-title">Share what's working — and what's not</h2>
@@ -52,7 +52,7 @@
           <div class="survey-cta-meta">
             <span class="survey-meta-chip">~3 minutes</span>
             <span class="survey-meta-chip">Anonymous</span>
-            <span class="survey-meta-chip">Morris Township residents &amp; commuters</span>
+            <span class="survey-meta-chip">Residents &amp; commuters</span>
           </div>
           <a
             href="https://docs.google.com/forms/d/e/1FAIpQLScUlws2NrIZG8uOzbm4ie1ohYeTw7dVvyO1vwGz2q5eIGwsiw/viewform"
@@ -66,13 +66,16 @@
         </div>
       </section>
 
-      <!-- DIVIDER -->
       <div class="survey-section-divider">
         <span class="survey-section-label">Also — flag a specific spot on the map</span>
       </div>
 
-      <!-- SECONDARY: Interactive Map guidance + form -->
-      <section aria-labelledby="map-section-title">
+    </div><!-- /survey-shell -->
+
+    <!-- FULL-WIDTH MAP SECTION -->
+    <div class="survey-map-breakout">
+      <div class="survey-map-inner">
+
         <div class="map-section-intro">
           <h2 id="map-section-title">Drop a pin on a trouble spot</h2>
           <p class="panel-subtitle">
@@ -80,7 +83,7 @@
           </p>
         </div>
 
-        <main class="survey-workspace">
+        <main class="survey-workspace" aria-labelledby="map-section-title">
           <section class="panel survey-map-card">
             <div class="map-card-header">
               <div>
@@ -205,15 +208,17 @@
             </form>
           </aside>
         </main>
-      </section>
 
-      <!-- FOOTER -->
+      </div><!-- /survey-map-inner -->
+    </div><!-- /survey-map-breakout -->
+
+    <!-- NARROW SHELL: footer -->
+    <div class="page-shell survey-shell">
       <footer class="survey-footer">
         <p>
           Run by the Morris Township Transportation Advisory Committee. All submissions are reviewed by the TAC.
         </p>
       </footer>
-
     </div>
 
     <div class="capture-banner" id="survey-capture-banner" hidden aria-live="polite">
