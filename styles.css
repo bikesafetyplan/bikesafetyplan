@@ -992,10 +992,13 @@ h2 {
 
 .survey-map-card {
   padding: 18px;
+  position: sticky;
+  top: 0;
 }
 
 .survey-map-card .map-stage {
-  min-height: 720px;
+  height: calc(100vh - 36px);
+  min-height: 500px;
 }
 
 #survey-map {
