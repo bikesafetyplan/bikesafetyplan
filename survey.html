@@ -31,41 +31,52 @@
   <body class="survey-page">
     <div class="page-shell survey-shell">
 
-      <!-- COMPACT HEADER -->
+      <!-- HEADER -->
       <header class="survey-header">
         <div class="survey-header-text">
           <p class="eyebrow">Transportation Advisory Committee</p>
           <h1>Bike, Walk &amp; Roll Survey</h1>
-          <p class="survey-tagline">
-            Help us improve walking, biking, and rolling in Morris Township. Takes about 3 minutes.
-          </p>
         </div>
         <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
           <span data-theme-label>Dark mode</span>
         </button>
       </header>
 
-      <!-- PRIMARY ACTION: Google Form embed -->
-      <section class="survey-form-embed" aria-labelledby="quick-survey-title">
-        <h2 id="quick-survey-title" class="sr-only">Survey Form</h2>
-        <iframe
-          src="https://docs.google.com/forms/d/e/1FAIpQLScUlws2NrIZG8uOzbm4ie1ohYeTw7dVvyO1vwGz2q5eIGwsiw/viewform?embedded=true"
-          width="100%"
-          height="1400"
-          frameborder="0"
-          marginheight="0"
-          marginwidth="0"
-          style="border:none;border-radius:12px;"
-          title="Morris Township Bike, Walk and Roll Survey"
-        >Loading survey…</iframe>
+      <!-- PRIMARY CTA -->
+      <section class="survey-cta-block panel" aria-labelledby="survey-cta-title">
+        <div class="survey-cta-body">
+          <h2 id="survey-cta-title">Share what's working — and what's not</h2>
+          <p class="survey-cta-desc">
+            Whether you're walking your kids to school, biking to the store, or just enjoying a neighborhood stroll — you know these streets better than anyone. A few questions, completely anonymous.
+          </p>
+          <div class="survey-cta-meta">
+            <span class="survey-meta-chip">~3 minutes</span>
+            <span class="survey-meta-chip">Anonymous</span>
+            <span class="survey-meta-chip">Morris Township residents &amp; commuters</span>
+          </div>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLScUlws2NrIZG8uOzbm4ie1ohYeTw7dVvyO1vwGz2q5eIGwsiw/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="survey-cta-button"
+          >
+            Take the Survey
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        </div>
       </section>
 
-      <!-- SECONDARY ACTION: Interactive Map (pin-drop) -->
-      <section class="survey-map-section" aria-labelledby="map-section-title">
+      <!-- DIVIDER -->
+      <div class="survey-section-divider">
+        <span class="survey-section-label">Also — flag a specific spot on the map</span>
+      </div>
+
+      <!-- SECONDARY: Interactive Map guidance + form -->
+      <section aria-labelledby="map-section-title">
         <div class="map-section-intro">
-          <h2 id="map-section-title">Want to flag a specific spot?</h2>
+          <h2 id="map-section-title">Drop a pin on a trouble spot</h2>
           <p class="panel-subtitle">
-            Use the map to drop a pin on a trouble spot, missing sidewalk, or unsafe intersection. You can also request a route to a destination.
+            If there's a specific location that needs attention — a bad intersection, missing sidewalk, or unsafe stretch — use the map below to flag it with a note and optional photo.
           </p>
         </div>
 
@@ -196,12 +207,13 @@
         </main>
       </section>
 
-      <!-- FOOTER ATTRIBUTION -->
-      <footer class="survey-footer" aria-labelledby="under-review-title">
-        <p id="under-review-title">
-          This survey is run by the Morris Township Transportation Advisory Committee (TAC) to collect resident input on walking, rolling, and cycling conditions. All submissions are reviewed by the TAC.
+      <!-- FOOTER -->
+      <footer class="survey-footer">
+        <p>
+          Run by the Morris Township Transportation Advisory Committee. All submissions are reviewed by the TAC.
         </p>
       </footer>
+
     </div>
 
     <div class="capture-banner" id="survey-capture-banner" hidden aria-live="polite">
