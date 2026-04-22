@@ -1,6 +1,6 @@
 const HOTSPOT_CATEGORIES = [
   { id: "sidewalk_gap", label: "Sidewalk gap", color: "#b85b3e" },
-  { id: "unsafe_crossing", label: "Unsafe crossing", color: "#9e3a35" },
+  { id: "unsafe_crossing", label: "Difficult or uncomfortable crossing", color: "#9e3a35" },
   { id: "visibility_issue", label: "Visibility issue", color: "#7c5d32" },
   { id: "speeding_concern", label: "Speeding concern", color: "#85564b" },
   { id: "accessibility_barrier", label: "Accessibility barrier", color: "#4f7077" },
@@ -270,7 +270,7 @@ function renderFormMode() {
   elements.descriptionLabel.textContent = isDestinationMode ? "What gets in the way" : "Problem description";
   elements.descriptionText.placeholder = isDestinationMode
     ? "Describe what gets in the way between your starting area and destination."
-    : "Describe the location and what feels difficult, unsafe, or incomplete.";
+    : "Describe the location and what could be improved for walking, biking, or accessibility.";
   elements.originAreaField.hidden = !isDestinationMode;
   elements.desiredDestinationField.hidden = !isDestinationMode;
   elements.originArea.required = isDestinationMode;
