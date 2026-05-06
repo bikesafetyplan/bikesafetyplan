@@ -19,7 +19,7 @@ const HOTSPOT_MODES = [
   { value: "walking", label: "Walking" },
   { value: "rolling", label: "Rolling" },
   { value: "cycling", label: "Cycling" },
-  { value: "safety", label: "Safety emphasis" },
+  { value: "safety", label: "Other" },
 ];
 
 const DESTINATION_MODES = [
@@ -753,7 +753,7 @@ function formatModeValue(value) {
     walking: "walking",
     rolling: "rolling",
     cycling: "cycling",
-    safety: "safety emphasis",
+    safety: "other",
   };
 
   return labels[value] || formatCategoryLabel(value).toLowerCase();
