@@ -55,7 +55,23 @@ const reviewState = {
   submissionBounds: null,
 };
 
+const surveyState = {
+  responses: [],
+  filtered: [],
+};
+
 const elements = {
+  unlockOverlay: document.getElementById("unlock-overlay"),
+  unlockForm: document.getElementById("unlock-form"),
+  unlockPassphrase: document.getElementById("unlock-passphrase"),
+  unlockError: document.getElementById("unlock-error"),
+  unlockSubmit: document.getElementById("unlock-submit"),
+  surveyFilterAudience: document.getElementById("survey-filter-audience"),
+  surveyFilterFrequency: document.getElementById("survey-filter-frequency"),
+  surveyFilterSearch: document.getElementById("survey-filter-search"),
+  surveyList: document.getElementById("survey-list"),
+  surveyVisibleCount: document.getElementById("survey-visible-count"),
+  metricSurvey: document.getElementById("metric-survey"),
   mapStatus: document.getElementById("review-map-status"),
   hotspotContextToggle: document.getElementById("review-hotspot-context"),
   filterSubmissionType: document.getElementById("filter-submission-type"),
@@ -73,14 +89,106 @@ const elements = {
   metricTopCategory: document.getElementById("metric-top-category"),
 };
 
+const UNLOCK_STORAGE_KEY = "bwr-review-passphrase";
+
 document.addEventListener("DOMContentLoaded", () => {
+  setupUnlock().catch((error) => {
+    console.error(error);
+    showUnlockError("The encrypted survey data could not be loaded. Try refreshing the page.");
+  });
+});
+
+async function setupUnlock() {
+  const stored = window.sessionStorage.getItem(UNLOCK_STORAGE_KEY);
+  if (stored && (await tryUnlock(stored, true))) {
+    return;
+  }
+  window.sessionStorage.removeItem(UNLOCK_STORAGE_KEY);
+
+  elements.unlockForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    elements.unlockError.hidden = true;
+    elements.unlockSubmit.disabled = true;
+    elements.unlockSubmit.textContent = "Checking…";
+
+    const unlocked = await tryUnlock(elements.unlockPassphrase.value, false);
+    if (!unlocked) {
+      elements.unlockSubmit.disabled = false;
+      elements.unlockSubmit.textContent = "Open the review board";
+      elements.unlockPassphrase.select();
+    }
+  });
+}
+
+async function tryUnlock(passphrase, silent) {
+  try {
+    const response = await fetch("data/survey-responses.enc.json");
+    if (!response.ok) {
+      throw new Error("Failed to fetch encrypted survey data.");
+    }
+    const blob = await response.json();
+    const payload = await decryptSurveyBlob(blob, passphrase);
+
+    window.sessionStorage.setItem(UNLOCK_STORAGE_KEY, passphrase);
+    revealBoard();
+    startBoard(Array.isArray(payload.responses) ? payload.responses : []);
+    return true;
+  } catch (error) {
+    // A wrong passphrase surfaces as an AES-GCM auth failure — expected, stay quiet.
+    if (!silent) {
+      showUnlockError();
+    }
+    return false;
+  }
+}
+
+async function decryptSurveyBlob(blob, passphrase) {
+  const fromBase64 = (value) => Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(passphrase),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: fromBase64(blob.salt), iterations: blob.iterations, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"],
+  );
+  const plaintext = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: fromBase64(blob.iv) },
+    key,
+    fromBase64(blob.ct),
+  );
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+
+function showUnlockError(message) {
+  if (message) {
+    elements.unlockError.textContent = message;
+  }
+  elements.unlockError.hidden = false;
+}
+
+function revealBoard() {
+  document.body.classList.remove("is-locked");
+  if (elements.unlockOverlay) {
+    elements.unlockOverlay.remove();
+  }
+}
+
+function startBoard(surveyResponses) {
+  initSurveySection(surveyResponses);
   init().catch((error) => {
     console.error(error);
     showMapFailure();
     elements.reviewList.innerHTML =
       '<p class="hotspot-list-empty">Review submissions could not be loaded right now. Confirm the Worker is running and the site origin is allowed.</p>';
   });
-});
+}
 
 async function init() {
   bindUi();
@@ -933,6 +1041,139 @@ function getTileConfig() {
 
 function getApiUrl(path) {
   return `${API_CONFIG.baseUrl.replace(/\/+$/, "")}${path}`;
+}
+
+const SURVEY_AUDIENCE_LABELS = {
+  "Live here": "Lives here",
+  Both: "Lives here & commutes",
+  "Commute through it": "Commutes through",
+};
+
+const SURVEY_QUESTION_LABELS = [
+  ["reasons", "Why they walk/bike/roll"],
+  ["sidewalks", "Sidewalk problems"],
+  ["intersections", "Difficult intersections & roads"],
+  ["avoided", "Routes they avoid"],
+  ["improvement", "One improvement"],
+  ["dream", "Car-free wish"],
+];
+
+function initSurveySection(responses) {
+  surveyState.responses = responses;
+  elements.metricSurvey.textContent = String(responses.length);
+
+  const frequencies = Array.from(
+    new Set(responses.map((entry) => entry.frequency).filter(Boolean)),
+  );
+  const preferredOrder = ["Daily", "Several times a week", "Occasionally", "Rarely", "Never"];
+  frequencies.sort((a, b) => {
+    const rankA = preferredOrder.indexOf(a);
+    const rankB = preferredOrder.indexOf(b);
+    return (rankA === -1 ? 99 : rankA) - (rankB === -1 ? 99 : rankB);
+  });
+  elements.surveyFilterFrequency.innerHTML = `
+    <option value="all">Any frequency</option>
+    ${frequencies
+      .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+      .join("")}
+  `;
+
+  elements.surveyFilterAudience.addEventListener("change", applySurveyFilters);
+  elements.surveyFilterFrequency.addEventListener("change", applySurveyFilters);
+  elements.surveyFilterSearch.addEventListener("input", applySurveyFilters);
+
+  applySurveyFilters();
+}
+
+function applySurveyFilters() {
+  const audience = elements.surveyFilterAudience.value;
+  const frequency = elements.surveyFilterFrequency.value;
+  const query = elements.surveyFilterSearch.value.trim().toLowerCase();
+
+  surveyState.filtered = surveyState.responses.filter((entry) => {
+    if (audience !== "all" && entry.audience !== audience) {
+      return false;
+    }
+    if (frequency !== "all" && entry.frequency !== frequency) {
+      return false;
+    }
+    if (query) {
+      const haystack = [
+        entry.neighborhood,
+        entry.reasons,
+        entry.sidewalks,
+        entry.intersections,
+        entry.avoided,
+        entry.improvement,
+        entry.dream,
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  renderSurveyList();
+}
+
+function renderSurveyList() {
+  elements.surveyVisibleCount.textContent = `${surveyState.filtered.length} shown`;
+  elements.surveyList.innerHTML = "";
+
+  if (!surveyState.filtered.length) {
+    elements.surveyList.innerHTML =
+      '<p class="hotspot-list-empty">No survey responses match the current filters.</p>';
+    return;
+  }
+
+  surveyState.filtered.forEach((entry) => {
+    const item = document.createElement("details");
+    item.className = "hotspot-card review-card review-item survey-item";
+
+    const title = entry.neighborhood || SURVEY_AUDIENCE_LABELS[entry.audience] || "Resident";
+    const metaBits = [
+      SURVEY_AUDIENCE_LABELS[entry.audience] || entry.audience,
+      entry.frequency,
+      formatSurveyDate(entry.ts),
+    ].filter(Boolean);
+
+    const answers = SURVEY_QUESTION_LABELS.filter(([key]) => entry[key]).map(
+      ([key, label]) => `
+        <div class="survey-qa">
+          <span class="survey-qa-label">${escapeHtml(label)}</span>
+          <p class="survey-qa-answer">${escapeHtml(entry[key])}</p>
+        </div>
+      `,
+    );
+
+    item.innerHTML = `
+      <summary class="review-item-summary">
+        <div class="review-item-summary-main">
+          <p class="hotspot-card-title">${escapeHtml(title)}</p>
+          <div class="review-card-flags">
+            ${entry.meeting ? '<span class="pill review-pill">Open to attending TAC</span>' : ""}
+          </div>
+        </div>
+        <span class="survey-item-meta">${escapeHtml(metaBits.join(" · "))}</span>
+      </summary>
+      <div class="review-item-body">
+        ${answers.length ? answers.join("") : '<p class="review-item-meta">No written answers on this one.</p>'}
+      </div>
+    `;
+
+    elements.surveyList.append(item);
+  });
+}
+
+function formatSurveyDate(value) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+  return parsed.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 function escapeHtml(value) {

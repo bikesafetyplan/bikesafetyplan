@@ -1177,6 +1177,102 @@ h2 {
   line-height: 1.45;
 }
 
+/* --- Working-group unlock gate --- */
+
+body.is-locked .page-shell {
+  display: none;
+}
+
+.unlock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.unlock-panel {
+  width: min(430px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 30px 28px;
+}
+
+.unlock-title {
+  margin: 6px 0 10px;
+  font-size: 1.5rem;
+}
+
+.unlock-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.unlock-submit {
+  justify-self: start;
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4603a 0%, #bf4f2d 100%);
+  color: #fff8f4;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.unlock-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.unlock-submit:hover,
+.unlock-submit:focus-visible {
+  filter: brightness(1.05);
+}
+
+/* --- Resident survey responses --- */
+
+.survey-filters {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.survey-item-meta {
+  flex: 0 0 auto;
+  max-width: 45%;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.survey-qa {
+  display: grid;
+  gap: 3px;
+  padding-top: 6px;
+}
+
+.survey-qa:first-child {
+  padding-top: 0;
+}
+
+.survey-qa-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.survey-qa-answer {
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
 /* `overflow: hidden` turns a closed <details> into a scroll container and
    Chrome then collapses its height to ~15px, clipping the summary and letting
    rows overlap. `overflow: clip` keeps the rounded-corner clipping without

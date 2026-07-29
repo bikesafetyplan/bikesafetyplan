@@ -27,7 +27,27 @@
     <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="review-page">
+  <body class="review-page is-locked">
+    <div class="unlock-overlay" id="unlock-overlay">
+      <form class="panel unlock-panel" id="unlock-form">
+        <div>
+          <p class="eyebrow">Working Group Review</p>
+          <h1 class="unlock-title">This board is for the working group</h1>
+          <p class="unlock-copy">
+            Survey responses stay encrypted until the group passphrase is entered. If you're on the
+            Bike, Walk &amp; Roll working group and don't have it, ask the TAC coordinator.
+          </p>
+        </div>
+        <label class="field">
+          <span class="field-label">Group passphrase</span>
+          <input type="password" id="unlock-passphrase" autocomplete="current-password" required />
+        </label>
+        <p class="field-error" id="unlock-error" hidden>
+          That passphrase didn't unlock the board. Check it and try again.
+        </p>
+        <button type="submit" class="unlock-submit" id="unlock-submit">Open the review board</button>
+      </form>
+    </div>
     <div class="page-shell">
       <header class="page-header">
         <div class="survey-intro">
@@ -105,6 +125,10 @@
           <div class="review-metric">
             <span class="review-metric-label">Top category</span>
             <strong class="review-metric-value review-metric-text" id="metric-top-category">None yet</strong>
+          </div>
+          <div class="review-metric">
+            <span class="review-metric-label">Survey responses</span>
+            <strong class="review-metric-value" id="metric-survey">0</strong>
           </div>
         </div>
       </section>
@@ -199,6 +223,53 @@
             Select a submission from the list or map to review its location, description, status, repeat-report signal, and photo evidence.
           </p>
         </div>
+      </section>
+
+      <section class="panel survey-voices" aria-labelledby="survey-voices-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Resident Survey</p>
+            <h2 id="survey-voices-title">Bike, Walk &amp; Roll survey responses</h2>
+            <p class="panel-subtitle">
+              Every response from the resident survey, newest first. Volunteered emails and house
+              numbers are stripped before publishing; contact addresses stay in the response sheet.
+            </p>
+          </div>
+        </div>
+
+        <form class="review-filters survey-filters" id="survey-filters">
+          <label class="field">
+            <span class="field-label">Respondent</span>
+            <select id="survey-filter-audience">
+              <option value="all">Everyone</option>
+              <option value="Live here">Lives here</option>
+              <option value="Both">Lives here &amp; commutes</option>
+              <option value="Commute through it">Commutes through</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">How often they walk/bike/roll</span>
+            <select id="survey-filter-frequency">
+              <option value="all">Any frequency</option>
+            </select>
+          </label>
+
+          <label class="field survey-search-field">
+            <span class="field-label">Search</span>
+            <input
+              type="search"
+              id="survey-filter-search"
+              placeholder="Street, intersection, keyword…"
+            />
+          </label>
+        </form>
+
+        <div class="review-list-header">
+          <h3 class="legend-group-title">Newest first</h3>
+          <span class="pill" id="survey-visible-count">0 shown</span>
+        </div>
+        <div class="review-list survey-list" id="survey-list" aria-live="polite"></div>
       </section>
     </div>
 
