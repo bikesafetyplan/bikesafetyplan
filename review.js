@@ -26,6 +26,19 @@ const API_CONFIG = {
   baseUrl: "https://morris-township-survey-intake.matthewreate.workers.dev",
 };
 
+/**
+ * Placeholder rows submitted during the 2026-03-11 intake test. They still live
+ * in D1 but should never appear in the review queue, the map, or the counts.
+ * Known ids are hidden outright; the pattern check catches any future filler
+ * row where the title, description, and location are all placeholder text.
+ */
+const JUNK_SUBMISSION_IDS = new Set([
+  "ac39a41a-4aa8-41d5-8ae9-5f6a12bdf9b6",
+  "f4652438-a326-4872-9ec6-7031f0a333f1",
+]);
+
+const PLACEHOLDER_TEXT_PATTERN = /^(test|tests|testing|test test|test123|asdf|asdfasdf|qwerty|xxx|zzz|abc|123|n\/a|na|none|placeholder|sample)$/;
+
 const reviewState = {
   map: null,
   baseTileLayer: null,
@@ -77,7 +90,7 @@ async function init() {
     loadGeoJSON("data/hotspots.geojson"),
   ]);
 
-  reviewState.allRecords = submissions.map(normalizeSubmission);
+  reviewState.allRecords = submissions.map(normalizeSubmission).filter((record) => !isJunkSubmission(record));
   reviewState.repeatMap = buildRepeatMap(reviewState.allRecords);
 
   populateCategoryFilter(reviewState.allRecords);
@@ -167,6 +180,33 @@ function normalizeSubmission(record) {
     longitude: Number.isFinite(record.longitude) ? record.longitude : parseNullableNumber(record.longitude),
     has_photo: Boolean(record.has_photo || record.photo_key),
   };
+}
+
+function isJunkSubmission(record) {
+  if (!record || !record.id) {
+    return true;
+  }
+
+  if (JUNK_SUBMISSION_IDS.has(record.id)) {
+    return true;
+  }
+
+  const title = normalizePlaceholderText(record.title);
+  const description = normalizePlaceholderText(record.description);
+  const location = normalizePlaceholderText(record.location_text);
+
+  return (
+    PLACEHOLDER_TEXT_PATTERN.test(title) &&
+    (description === "" || PLACEHOLDER_TEXT_PATTERN.test(description)) &&
+    (location === "" || PLACEHOLDER_TEXT_PATTERN.test(location))
+  );
+}
+
+function normalizePlaceholderText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?]+$/, "");
 }
 
 function parseNullableNumber(value) {
@@ -438,7 +478,7 @@ function renderList() {
         </div>
         <span class="mini-tag">
           <span class="swatch" style="background:${category.color}"></span>
-          ${escapeHtml(category.label)}
+          <span class="mini-tag-label">${escapeHtml(category.label)}</span>
         </span>
       </summary>
       <div class="review-item-body">
@@ -579,7 +619,7 @@ function renderDetail(record) {
       <h3 class="detail-title">${escapeHtml(record.title)}</h3>
       <span class="mini-tag">
         <span class="swatch" style="background:${category.color}"></span>
-        ${escapeHtml(category.label)}
+        <span class="mini-tag-label">${escapeHtml(category.label)}</span>
       </span>
     </div>
     <p class="detail-body">${escapeHtml(record.description || "No description provided.")}</p>

@@ -3,7 +3,7 @@ main = "src/index.mjs"
 compatibility_date = "2026-03-10"
 
 [vars]
-ALLOWED_ORIGINS = "https://www.bwrsafetyplan.com,https://bwrsafetyplan.com,https://bikesafetyplan.github.io,http://localhost:8000"
+ALLOWED_ORIGINS = "https://www.bwrsafetyplan.com,https://bwrsafetyplan.com,https://matthewreate.github.io,https://bikesafetyplan.github.io,http://localhost:8000"
 R2_ACCOUNT_ID = "d17ca0bc458a3f3d320952a7b03d2fe7"
 R2_BUCKET_NAME = "morris-township-photos"
 
