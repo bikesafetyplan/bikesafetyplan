@@ -1026,16 +1026,18 @@ function applyReviewMapTheme() {
   reviewState.labelTileLayer.setUrl(tileConfig.labelUrl);
 }
 
+const CARTO_BASEMAP_KEY = "cb1_3nce_1_fc238dd707d3be7e2ed7e9af";
+
 function getTileConfig() {
   const isDarkTheme = document.documentElement.dataset.theme === "dark";
   return isDarkTheme
     ? {
-        baseUrl: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-        labelUrl: "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        baseUrl: `https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=${CARTO_BASEMAP_KEY}`,
+        labelUrl: `https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png?key=${CARTO_BASEMAP_KEY}`,
       }
     : {
-        baseUrl: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-        labelUrl: "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+        baseUrl: `https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png?key=${CARTO_BASEMAP_KEY}`,
+        labelUrl: `https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png?key=${CARTO_BASEMAP_KEY}`,
       };
 }
 
